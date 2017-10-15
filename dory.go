@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	doryBackend "github.com/abhishekkr/dory/dory_backend"
+	doryBackend "github.com/abhishekkr/dory/doryBackend"
 
 	golenv "github.com/abhishekkr/gol/golenv"
 	gin "github.com/gin-gonic/gin"
