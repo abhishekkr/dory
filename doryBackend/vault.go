@@ -8,9 +8,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/abhishekkr/gol/golhttpclient"
+	"github.com/gin-gonic/gin"
 )
 
 type Vault struct {
@@ -43,17 +43,26 @@ func NewVault(baseAddr string, authToken string) Vault {
 	}
 }
 
-func (vault Vault) AuthList() {
+func (vault Vault) AuthList(ctx *gin.Context) {
 	vault.Request.Url = fmt.Sprintf("%s/v1/sys/auth", vault.Request.Url)
 	response, err := vault.Request.Get()
 	if err != nil {
-		log.Println(err)
+		ctx.JSON(500, ExitResponse{Msg: err.Error()}.JSON())
 		return
 	}
-	log.Println(response)
+	ctx.JSON(200, response)
 }
 
-func (vault Vault) AuthMount(auth VaultAuthBackend) {
+func (vault Vault) AuthMount(ctx *gin.Context) {
+	mountPoint := ctx.Param("uuid")
+
+	auth := VaultAuthBackend{
+		MountPoint:  mountPoint,
+		Type:        "userspace",
+		Local:       true,
+		Description: fmt.Sprintf("login to find %s", mountPoint),
+	}
+
 	vault.Request.Url = fmt.Sprintf("%s/v1/sys/auth/%s", vault.Request.Url, auth.MountPoint)
 	vault.Request.HTTPHeaders["Content-Type"] = "application/json"
 
@@ -63,19 +72,24 @@ func (vault Vault) AuthMount(auth VaultAuthBackend) {
 
 	response, err := vault.Request.Post()
 	if err != nil {
-		log.Println(err)
+		ctx.JSON(500, ExitResponse{Msg: err.Error()}.JSON())
+		return
+	} else if response != "" {
+		ctx.JSON(400, response)
 		return
 	}
-	log.Println(response)
+	ctx.JSON(200, ExitResponse{Msg: auth.MountPoint}.JSON())
 }
 
-func (vault Vault) AuthUnmount(auth VaultAuthBackend) {
-	vault.Request.Url = fmt.Sprintf("%s/v1/sys/auth/%s", vault.Request.Url, auth.MountPoint)
+func (vault Vault) AuthUnmount(ctx *gin.Context) {
+	mountPoint := ctx.Param("uuid")
+
+	vault.Request.Url = fmt.Sprintf("%s/v1/sys/auth/%s", vault.Request.Url, mountPoint)
 
 	response, err := vault.Request.Delete()
 	if err != nil {
-		log.Println(err)
+		ctx.JSON(500, ExitResponse{Msg: err.Error()}.JSON())
 		return
 	}
-	log.Println(response)
+	ctx.JSON(200, response)
 }

@@ -1,19 +1,15 @@
 package doryBackend
 
-import "github.com/gin-gonic/gin"
+import "encoding/json"
 
-func (vault Vault) API(ctx *gin.Context) {
+type ExitResponse struct {
+	Msg string `json:"exit-message"`
+}
 
-	newAuth := VaultAuthBackend{
-		MountPoint:  "nemo",
-		Type:        "userspace",
-		Local:       true,
-		Description: "login to find nemo",
+func (response ExitResponse) JSON() (jsonResponse []byte) {
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		jsonResponse, _ = json.Marshal("{\"error\": \"exit response generation failed\"}")
 	}
-	vault.AuthList()
-	vault.AuthMount(newAuth)
-	vault.AuthList()
-	vault.AuthUnmount(newAuth)
-	vault.AuthList()
-
+	return
 }

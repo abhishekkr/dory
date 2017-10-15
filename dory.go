@@ -11,9 +11,15 @@ import (
 )
 
 var (
+	HTTPAt     = golenv.OverrideIfEnv("DORY_HTTP", ":8080")
 	VaultAddr  = golenv.OverrideIfEnv("VAULT_ADDR", "http://127.0.0.1:8200")
 	VaultToken = golenv.OverrideIfEnv("VAULT_TOKEN", "configure-env-var-VAULT_TOKEN")
 )
+
+func main() {
+	GinUp(HTTPAt)
+	fmt.Println("bye .")
+}
 
 func doryHelp(ctx *gin.Context) {
 	ctx.HTML(
@@ -23,7 +29,7 @@ func doryHelp(ctx *gin.Context) {
 	)
 }
 
-func main() {
+func GinUp(listenAt string) {
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
 
@@ -35,10 +41,10 @@ func main() {
 
 	v_0_1 := router.Group("/v0.1")
 	{
-		v_0_1.GET("/vault", vault.API)
+		v_0_1.GET("/vault", vault.AuthList)
+		v_0_1.POST("/vault/:uuid", vault.AuthMount)
+		v_0_1.DELETE("/vault/:uuid", vault.AuthUnmount)
 	}
 
-	router.Run()
-	fmt.Println("bye .")
-
+	router.Run(listenAt)
 }
