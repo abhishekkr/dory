@@ -6,5 +6,6 @@ Share your secret with a fish that have short term memory.
 
 ---
 
+[MIT Licensed](./LICENSE)
 
-
+---
