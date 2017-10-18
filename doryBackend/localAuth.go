@@ -48,7 +48,6 @@ func (localAuth LocalAuth) Get(ctx *gin.Context) {
 
 	ctx.Writer.WriteHeader(http.StatusOK)
 	ctx.Writer.Write(response)
-	//ctx.JSON(200, response)
 }
 
 func (localAuth LocalAuth) AuthMount(ctx *gin.Context) {
@@ -81,7 +80,6 @@ func (localAuth LocalAuth) AuthMount(ctx *gin.Context) {
 	}
 
 	ctx.String(http.StatusOK, string(localAuthItem.Value.Key))
-	//ctx.JSON(200, ExitResponse{Msg: string(localAuthItem.Value.Key)})
 }
 
 func (localAuth LocalAuth) AuthUnmount(ctx *gin.Context) {
@@ -89,6 +87,7 @@ func (localAuth LocalAuth) AuthUnmount(ctx *gin.Context) {
 
 	localAuthItem := localAuth.Item
 	localAuthItem.Name = ctx.Param("uuid")
+	localAuthItem.Value.Key = []byte(ctx.Request.Header.Get("X-DORY-TOKEN"))
 
 	if !localAuthItem.Delete(localAuth.Store) {
 		ctx.JSON(500, ExitResponse{Msg: "auth identifier purge failed"})

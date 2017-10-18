@@ -76,15 +76,32 @@ func (auth *LocalAuth) Delete(localAuthStore *cache2go.CacheTable) bool {
 	var err error
 
 	if localAuthStore == nil {
-		return true
+		log.Println("delete triggered for missing auth-store")
+		return false
+	}
+	if auth.Value.Key == nil {
+		log.Println("delete triggered for empty key")
+		return false
+	}
+	if !auth.Exists(localAuthStore) {
+		log.Println("delete triggered for missing auth identifier")
+		return false
 	}
 
-	if auth.Value.Key == nil || !localAuthStore.Exists(auth.Name) {
-		return true
+	cipherCacheItem, err := localAuthStore.Value(auth.Name)
+	cipherData := cipherCacheItem.Data().(*golcrypt.Cipher)
+	auth.Value.Cipher = *cipherData
+
+	if err = auth.Value.Decrypt(); err != nil {
+		log.Println("to delete decrypt shall pass;", err)
+		return false
 	}
+	auth.Value.Cipher = nil
+	auth.Value.DataBlob = nil
 
 	_, err = localAuthStore.Delete(auth.Name)
 	if err != nil {
+		log.Println("delete triggered but", err)
 		return false
 	}
 
