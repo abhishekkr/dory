@@ -1,5 +1,11 @@
 ## dory
 
+quick try using docker [abhishekkr/dory:0.1-alpine](https://hub.docker.com/r/abhishekkr/dory/)
+
+```
+docker run -it -p8080:8080 abhishekkr/dory:0.1-alpine
+```
+
 Share your secret with a fish that have short term memory.
 
 When you run `dory`, webserver by default will be available at [:8080](http://localhost:8080) and hosts [help document](http://localhost:8080/help) for quick overview.
