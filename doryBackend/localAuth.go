@@ -46,6 +46,13 @@ func (localAuth LocalAuth) Get(ctx *gin.Context) {
 
 	response := localAuthItem.Value.DataBlob
 
+	if ctx.DefaultQuery("keep", "false") == "false" {
+		if !localAuthItem.Delete(localAuth.Store) {
+			ctx.JSON(500, ExitResponse{Msg: "auth identifier purge failed", Data: response})
+			return
+		}
+	}
+
 	ctx.Writer.WriteHeader(http.StatusOK)
 	ctx.Writer.Write(response)
 }

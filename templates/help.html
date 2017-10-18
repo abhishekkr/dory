@@ -72,7 +72,8 @@
                     <p class="left-align">
                       Users call it with a authentication login name/identifier. If it pre-exists, you get HTTP-409 (Conflict).<br/>
                       If it can allocate, a token is generate and returned as response. If a timeout is not provided in request, default timeout of 5minute is configured. The storage of secret is in encrypted mode.<br/>
-                      Now when this name/identifier is accessed with token, deciphered value is returned and store is expunged if explicitly not asked to retain.
+                      Also in GET request made to fetch value providing correct <code>X-DORY-TOKEN</code>, unless a GET Param <code>keep=true</code> is provided... the data gets purged in first fetch. Otherwise the TTL gets revised.<br/>
+                      POST request of Data returns back the secret token required to be passed as value of HTTP Header <code>X-DORY-TOKEN</code> for GET and DELETE query for same auth identifier path.
                     </p>
                   </div>
                   <div id="ability">

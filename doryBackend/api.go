@@ -7,7 +7,8 @@ import (
 )
 
 type ExitResponse struct {
-	Msg string `json:"exit-message"`
+	Msg  string `json:"exit-message"`
+	Data []byte `json:"data,omitempty"`
 }
 
 func (response ExitResponse) JSON() (jsonResponse []byte) {
