@@ -42,21 +42,60 @@
     <center>
       <div class="section"></div>
 
-      <div class="indigo-text bold">this is <h5 style="display:inline;">Dory</h5>,<br/> the fish you can tell anything to share secrets, cuz it'll forget after a while</div>
+      <div class="indigo-text bold">this is <h4 style="display:inline;">Dory</h4>,<br/> the fish you can tell anything to share secrets, cuz it'll forget after a while</div>
       <div class="section"></div>
 
       <div class="container">
         <div class="z-depth-1 grey lighten-4 row" style="display: inline-block; padding: 32px 48px 0px 48px; border: 1px solid #EEE;">
-          <div class="flow-text">
-            Currently this is a work in progress.<br/>
-            Building it in <a href="https://gin-gonic.github.io/gin/">Gin</a>.
+            <div class="card">
+                <div class="card-content">
+                        Local AES encrypted store is stable. Vault support is WIP.<br/>
+                        Building it in <a href="https://gin-gonic.github.io/gin/">Gin</a>, <a href="https://github.com/muesli/cache2go">Cache2Go</a> and <a href="https://github.com/abhishekkr/gol">Gol Library Set</a>.
+                </div>
+                <div class="card-tabs">
+                  <ul class="tabs tabs-fixed-width">
+                    <li class="tab"><a href="#need">What Was The Need?</a></li>
+                    <li class="tab"><a class="active" href="#what">How It Works?</a></li>
+                    <li class="tab"><a href="#ability">What Is It Capable Of?</a></li>
+                    <li class="tab"><a href="#howto">How To Use?</a></li>
+                  </ul>
+                </div>
+                <div class="card-content grey lighten-4">
+                  <div id="need">
+                    <p class="left-align">
+                      The jobs/services were being run in pre-baked containers over Kubernetes, Nomad, Mesos or others.<br/>
+                      They were picking all configuration during spawn from environment variables injected. But some them required secrets to be shared with them which couldn't have been injected as environment variables as they are available to greater scope of maintainers and administrators with access to cluster, logs and others.<br/>
+                      Secrets meant to be shared secretly, pulled from a source to a local configuration file which can be individually read by the spawned process. And cleaned from source and local store. If not accessed from secret store, it expunges it over time anyways.
+                    </p>
+                  </div>
+                  <div id="what">
+                    <p class="left-align">
+                      Users call it with a authentication login name/identifier. If it pre-exists, you get HTTP-409 (Conflict).<br/>
+                      If it can allocate, a token is generate and returned as response. If a timeout is not provided in request, default timeout of 5minute is configured. The storage of secret is in encrypted mode.<br/>
+                      Now when this name/identifier is accessed with token, deciphered value is returned and store is expunged if explicitly not asked to retain.
+                    </p>
+                  </div>
+                  <div id="ability">
+                    <p class="left-align">
+                      Currently it'll  enable local storage in AES encrypted blobs and HashiCorp's Vault as backend.<br/>
+                      More can be added easily given project structure. Will soon provide external plug-in support for backends.
+                    </p>
+                  </div>
+                  <div id="howto">
+                            <code>
+                              what
+                            </code>
+                  </div>
+                </div>
+            </div> <!--- closing card tag --->
+
+
             <hr/>
             <img src="images/dory-1024px.jpg" alt="dory" class="responsive-img"/>
             <hr/>
-          </div>
         </div>
       </div>
-      <a href="mailto:abhikumar163@gmail.com">Reach out to us on developer channel for more details.</a>
+      <a href="https://github.com/abhishekkr/dory/issues">Reach out to us on developer channel for more details.</a>
     </center>
 
     <div class="section"></div>

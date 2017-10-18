@@ -29,12 +29,32 @@ func doryHelp(ctx *gin.Context) {
 	)
 }
 
+func ginCors() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		ctx.Writer.Header().Add("Access-Control-Allow-Origin", "*")
+		ctx.Next()
+	}
+}
+
+func ginHandleErrors(ctx *gin.Context) {
+	ctx.Next()
+	errorToPrint := ctx.Errors.ByType(gin.ErrorTypePublic).Last()
+	if errorToPrint != nil {
+		ctx.JSON(500, gin.H{
+			"status":  500,
+			"message": errorToPrint.Error(),
+		})
+	}
+}
+
 func GinUp(listenAt string) {
-	router := gin.Default()
-	router.LoadHTMLGlob("templates/*")
-
 	vault := doryBackend.NewVault(VaultAddr, VaultToken)
+	localAuth := doryBackend.NewLocalAuth("dory")
 
+	router := gin.Default()
+	router.Use(ginHandleErrors)
+	router.Use(ginCors())
+	router.LoadHTMLGlob("templates/*")
 	router.Static("/images", "w3assets/images")
 
 	router.GET("/help", doryHelp)
@@ -42,8 +62,14 @@ func GinUp(listenAt string) {
 	v_0_1 := router.Group("/v0.1")
 	{
 		v_0_1.GET("/vault", vault.AuthList)
+		v_0_1.GET("/vault/:uuid", vault.Get)
 		v_0_1.POST("/vault/:uuid", vault.AuthMount)
 		v_0_1.DELETE("/vault/:uuid", vault.AuthUnmount)
+
+		v_0_1.GET("/local-auth", localAuth.AuthList)
+		v_0_1.GET("/local-auth/:uuid", localAuth.Get)
+		v_0_1.POST("/local-auth/:uuid", localAuth.AuthMount)
+		v_0_1.DELETE("/local-auth/:uuid", localAuth.AuthUnmount)
 	}
 
 	router.Run(listenAt)

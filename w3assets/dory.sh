@@ -1,0 +1,51 @@
+
+export LOCAL_AUTH_ADDR="http://127.0.0.1:8080/v0.1"
+export LOCAL_AUTH_TOKEN=""
+export LOCAL_AUTH_PATH="pg"
+
+seperator(){
+  echo ""
+  echo "--------------------------------------"
+}
+
+local-auth-list(){
+  curl -vvskL \
+      --header "X-DORY-TOKEN: ${LOCAL_AUTH_TOKEN}" \
+      ${LOCAL_AUTH_ADDR}/local-auth
+
+  seperator
+}
+
+local-auth-mount(){
+  cat > /tmp/secret <<PEOF
+{
+  "username": "postgres",
+  "password": "mostdiversedb"
+}
+PEOF
+
+  export LOCAL_AUTH_TOKEN=$(curl -skL -X POST --data @/tmp/secret ${LOCAL_AUTH_ADDR}/local-auth/${LOCAL_AUTH_PATH})
+
+  echo $LOCAL_AUTH_TOKEN
+
+  seperator
+}
+
+local-auth-ls(){
+  curl -skL \
+      --header "X-DORY-TOKEN: ${LOCAL_AUTH_TOKEN}" \
+      --request GET \
+      ${LOCAL_AUTH_ADDR}/local-auth/${LOCAL_AUTH_PATH}
+
+  seperator
+}
+
+local-auth-unmount(){
+  curl -skL \
+      --header "X-DORY-TOKEN: ${LOCAL_AUTH_TOKEN}" \
+      --request DELETE \
+      ${LOCAL_AUTH_ADDR}/local-auth/${LOCAL_AUTH_PATH}
+
+  seperator
+}
+

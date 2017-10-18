@@ -44,6 +44,9 @@ func NewVault(baseAddr string, authToken string) Vault {
 }
 
 func (vault Vault) AuthList(ctx *gin.Context) {
+	wip(ctx)
+	return
+
 	vault.Request.Url = fmt.Sprintf("%s/v1/sys/auth", vault.Request.Url)
 	response, err := vault.Request.Get()
 	if err != nil {
@@ -53,7 +56,18 @@ func (vault Vault) AuthList(ctx *gin.Context) {
 	ctx.JSON(200, response)
 }
 
+func (vault Vault) Get(ctx *gin.Context) {
+	wip(ctx)
+	return
+
+	response := ExitResponse{Msg: "WIP"}.JSON()
+	ctx.JSON(200, response)
+}
+
 func (vault Vault) AuthMount(ctx *gin.Context) {
+	wip(ctx)
+	return
+
 	mountPoint := ctx.Param("uuid")
 
 	auth := VaultAuthBackend{
@@ -82,6 +96,9 @@ func (vault Vault) AuthMount(ctx *gin.Context) {
 }
 
 func (vault Vault) AuthUnmount(ctx *gin.Context) {
+	wip(ctx)
+	return
+
 	mountPoint := ctx.Param("uuid")
 
 	vault.Request.Url = fmt.Sprintf("%s/v1/sys/auth/%s", vault.Request.Url, mountPoint)
