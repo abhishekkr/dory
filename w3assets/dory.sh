@@ -1,5 +1,5 @@
 
-export LOCAL_AUTH_ADDR="http://127.0.0.1:8080/v0.1"
+export LOCAL_AUTH_ADDR="http://127.0.0.1:8080"
 export LOCAL_AUTH_TOKEN=""
 export LOCAL_AUTH_PATH="pg"
 
@@ -26,7 +26,7 @@ PEOF
 
   export LOCAL_AUTH_TOKEN=$(curl -skL -X POST --data @/tmp/secret ${LOCAL_AUTH_ADDR}/local-auth/${LOCAL_AUTH_PATH})
 
-  echo $LOCAL_AUTH_TOKEN
+  echo "auth-token: "$LOCAL_AUTH_TOKEN
 
   seperator
 }

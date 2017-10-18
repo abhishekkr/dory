@@ -56,20 +56,21 @@ func GinUp(listenAt string) {
 	router.Use(ginCors())
 	router.LoadHTMLGlob("templates/*")
 	router.Static("/images", "w3assets/images")
+	router.StaticFile("/favicon.ico", "w3assets/favicon.ico")
 
 	router.GET("/help", doryHelp)
 
-	v_0_1 := router.Group("/v0.1")
-	{
-		v_0_1.GET("/vault", vault.AuthList)
-		v_0_1.GET("/vault/:uuid", vault.Get)
-		v_0_1.POST("/vault/:uuid", vault.AuthMount)
-		v_0_1.DELETE("/vault/:uuid", vault.AuthUnmount)
+	router.GET("/local-auth", localAuth.AuthList)
+	router.GET("/local-auth/:uuid", localAuth.Get)
+	router.POST("/local-auth/:uuid", localAuth.AuthMount)
+	router.DELETE("/local-auth/:uuid", localAuth.AuthUnmount)
 
-		v_0_1.GET("/local-auth", localAuth.AuthList)
-		v_0_1.GET("/local-auth/:uuid", localAuth.Get)
-		v_0_1.POST("/local-auth/:uuid", localAuth.AuthMount)
-		v_0_1.DELETE("/local-auth/:uuid", localAuth.AuthUnmount)
+	alpha := router.Group("/alpha")
+	{
+		alpha.GET("/vault", vault.AuthList)
+		alpha.GET("/vault/:uuid", vault.Get)
+		alpha.POST("/vault/:uuid", vault.AuthMount)
+		alpha.DELETE("/vault/:uuid", vault.AuthUnmount)
 	}
 
 	router.Run(listenAt)
