@@ -20,6 +20,10 @@ func NewLocalAuthStore(cacheName string) *cache2go.CacheTable {
 	return cache2go.Cache(cacheName)
 }
 
+func (auth *LocalAuth) Exists(localAuthStore *cache2go.CacheTable) bool {
+	return localAuthStore.Exists(auth.Name)
+}
+
 func (auth *LocalAuth) Set(localAuthStore *cache2go.CacheTable) bool {
 	if localAuthStore == nil {
 		return false
@@ -41,7 +45,7 @@ func (auth *LocalAuth) Set(localAuthStore *cache2go.CacheTable) bool {
 	ttl := time.Duration(auth.TTLSecond) * time.Second
 	localAuthStore.Add(auth.Name, ttl, &auth.Value.Cipher)
 
-	return localAuthStore.Exists(auth.Name)
+	return auth.Exists(localAuthStore)
 }
 
 func (auth *LocalAuth) Get(localAuthStore *cache2go.CacheTable) bool {

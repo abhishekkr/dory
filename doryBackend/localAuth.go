@@ -55,6 +55,11 @@ func (localAuth LocalAuth) AuthMount(ctx *gin.Context) {
 	localAuthItem := localAuth.Item
 	localAuthItem.Name = ctx.Param("uuid")
 
+	if localAuthItem.Exists(localAuth.Store) {
+		ctx.JSON(409, ExitResponse{Msg: "auth identifier conflict"})
+		return
+	}
+
 	ttlsecond, err := strconv.Atoi(ctx.DefaultQuery("ttlsecond", "0"))
 	if err != nil {
 		ctx.Writer.Header().Add("Content-Type", "application/json")
