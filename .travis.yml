@@ -6,7 +6,7 @@ go:
   - tip
 
 install:
-  - ./go-tasks build
+  - ./go-tasks deps
 
 script:
-  - ./go-tasks quality
+  - ./go-tasks build
