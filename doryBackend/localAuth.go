@@ -15,11 +15,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+/*
+A struct to maintain connection details for a Local-Auth and single item construct for actions.
+*/
 type LocalAuth struct {
 	Store *cache2go.CacheTable
 	Item  doryMemory.LocalAuth
 }
 
+/*
+To instantiate and return a LocalAuth struct in reference to any usable Vault backend.
+*/
 func NewLocalAuth(cacheName string) LocalAuth {
 	localAuth := LocalAuth{
 		Store: doryMemory.NewLocalAuthStore(cacheName),
@@ -28,10 +34,16 @@ func NewLocalAuth(cacheName string) LocalAuth {
 	return localAuth
 }
 
+/*
+To list not-sensitive details on secrets stored at Local-Auth.
+*/
 func (localAuth LocalAuth) AuthList(ctx *gin.Context) {
 	wip(ctx)
 }
 
+/*
+To fetch a required auth mapped secret from Local-Auth backend.
+*/
 func (localAuth LocalAuth) Get(ctx *gin.Context) {
 	localAuthItem := localAuth.Item
 
@@ -57,6 +69,9 @@ func (localAuth LocalAuth) Get(ctx *gin.Context) {
 	ctx.Writer.Write(response)
 }
 
+/*
+To store a secret mapped with a new auth-path only at Local-Auth with unique auth-token.
+*/
 func (localAuth LocalAuth) AuthMount(ctx *gin.Context) {
 	localAuthItem := localAuth.Item
 	localAuthItem.Name = ctx.Param("uuid")
@@ -89,6 +104,9 @@ func (localAuth LocalAuth) AuthMount(ctx *gin.Context) {
 	ctx.String(http.StatusOK, string(localAuthItem.Value.Key))
 }
 
+/*
+To purge a previously local-auth stored mapped to a auth-path if not yet purged by TTL.
+*/
 func (localAuth LocalAuth) AuthUnmount(ctx *gin.Context) {
 	ctx.Writer.Header().Add("Content-Type", "application/json")
 

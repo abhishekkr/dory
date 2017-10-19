@@ -40,8 +40,7 @@ Current Features:
 > default it runs at `:8080`, to run it at any other port (or IP::PORT), export environment variable `DORY_HTTP` with required listen-at value before running `dory` in that env scope.
 
 ```
-
-GO_MAIN_FILE=dory.go ./go-tasks build
+./go-tasks build
 ```
 
 

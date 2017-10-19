@@ -1,5 +1,9 @@
 package doryMemory
 
+/*
+package for Create/Read/Delete actions over Cache2Go Table for items post aes encryption
+*/
+
 import (
 	"log"
 	"time"
@@ -10,20 +14,32 @@ import (
 	"github.com/muesli/cache2go"
 )
 
+/*
+Struct for Name as Auth-Path, Value with Gol Library Struct for Data/Cipher/Key nodes, TTLSecond for expiry timeout.
+*/
 type LocalAuth struct {
 	Name      string
 	Value     golcrypt.AESBlock
 	TTLSecond uint64
 }
 
+/*
+Instantiate and return a Cache2Go Table store.
+*/
 func NewLocalAuthStore(cacheName string) *cache2go.CacheTable {
 	return cache2go.Cache(cacheName)
 }
 
+/*
+Check if a Auth-Path exists in Cache2Go Table.
+*/
 func (auth *LocalAuth) Exists(localAuthStore *cache2go.CacheTable) bool {
 	return localAuthStore.Exists(auth.Name)
 }
 
+/*
+Set an encrypted value with random/provided Token at Auth-Path in Cache2Go Table.
+*/
 func (auth *LocalAuth) Set(localAuthStore *cache2go.CacheTable) bool {
 	if localAuthStore == nil {
 		return false
@@ -48,6 +64,9 @@ func (auth *LocalAuth) Set(localAuthStore *cache2go.CacheTable) bool {
 	return auth.Exists(localAuthStore)
 }
 
+/*
+Get a value decrypted by Token stored at a Auth-Path in Cache2Go Table.
+*/
 func (auth *LocalAuth) Get(localAuthStore *cache2go.CacheTable) bool {
 	if localAuthStore == nil {
 		return false
@@ -72,6 +91,9 @@ func (auth *LocalAuth) Get(localAuthStore *cache2go.CacheTable) bool {
 	return true
 }
 
+/*
+Purge a Auth-Path in Cache2Go Table, if it's value is decipherable by given Token.
+*/
 func (auth *LocalAuth) Delete(localAuthStore *cache2go.CacheTable) bool {
 	var err error
 

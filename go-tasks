@@ -1,5 +1,8 @@
 #!/bin/bash
 
+GO_MAIN_FILE="dory.go"
+BASE_PKG_NAME="dory"
+
 THIS_DIR=$(pwd)
 cd $(dirname $0)
 MY_DIR=$(pwd)
@@ -163,6 +166,7 @@ all-paths-with-go-files(){
 
 go-vet-all(){
   go tool vet -all *.go
+
   for loc in $(all-paths-with-go-files); do
     go tool vet -all ${loc}
   done
@@ -185,17 +189,22 @@ go-safesql(){
 }
 
 go-reporter(){
+  local REPORT_PATH="./spec-reports/goreporter"
+
   go get github.com/360EntSecGroup-Skylar/goreporter
 
+  mkdir -p ${REPORT_PATH}
+
   for loc in $(all-paths-with-go-files); do
-    goreporter -p ${loc} -f html
+    goreporter -p ${loc} -f html -log_dir ${REPORT_PATH}
   done
 
-  mkdir -p spec-reports/goreporter
-  mv ./pkg-*-*-*-*-*-*.html ./spec-reports/goreporter
+  mv ./${BASE_PKG_NAME}-*-*-*-*-*-*.html ${REPORT_PATH}
 }
 
 go-quality-check(){
+  goenv-on-at $(pwd)
+
   echo ""
   echo "### running ~ *go vet*"
   echo ""
