@@ -10,7 +10,7 @@ import (
 )
 
 /*
-A struct to maintain connection details for a Hashicorp Vault Backend
+Vault is a struct to maintain connection details for a Hashicorp Vault Backend
 */
 type Vault struct {
 	BaseAddr  string
@@ -19,7 +19,7 @@ type Vault struct {
 }
 
 /*
-A struct to hold each secret store that maps to a auth-path.
+VaultAuthBackend is a struct to hold each secret store that maps to a auth-path.
 */
 type VaultAuthBackend struct {
 	MountPoint  string `json:"mountpoint"`
@@ -29,7 +29,7 @@ type VaultAuthBackend struct {
 }
 
 /*
-To instantiate and return a Vault struct in reference to any usable Vault backend.
+NewVault instantiates and return a Vault struct in reference to any usable Vault backend.
 */
 func NewVault(baseAddr string, authToken string) Vault {
 	vaultHTTPHeaders := map[string]string{
@@ -49,7 +49,7 @@ func NewVault(baseAddr string, authToken string) Vault {
 }
 
 /*
-To list not-sensitive details on secrets stored at Vault.
+AuthList lists not-sensitive details on secrets stored at Vault.
 */
 func (vault Vault) AuthList(ctx *gin.Context) {
 	wip(ctx)
@@ -66,7 +66,7 @@ func (vault Vault) AuthList(ctx *gin.Context) {
 }
 
 /*
-To fetch a required auth mapped secret from Vault backend.
+Get fetchs a required auth mapped secret from Vault backend.
 */
 func (vault Vault) Get(ctx *gin.Context) {
 	wip(ctx)
@@ -78,7 +78,7 @@ func (vault Vault) Get(ctx *gin.Context) {
 }
 
 /*
-To store a secret mapped with a new auth-path only at Vault with unique auth-token.
+AuthMount stores a secret mapped with a new auth-path only at Vault with unique auth-token.
 */
 func (vault Vault) AuthMount(ctx *gin.Context) {
 	wip(ctx)
@@ -113,7 +113,7 @@ func (vault Vault) AuthMount(ctx *gin.Context) {
 }
 
 /*
-To purge a previously vault stored auth mapped to a auth-path if not yet purged by TTL.
+AuthUnmount purges a previously vault stored auth mapped to a auth-path if not yet purged by TTL.
 */
 func (vault Vault) AuthUnmount(ctx *gin.Context) {
 	wip(ctx)

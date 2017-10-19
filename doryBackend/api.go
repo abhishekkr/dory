@@ -7,7 +7,7 @@ import (
 )
 
 /*
-A struct to create custom JSON HTTP response.
+ExitResponse is a struct to create custom JSON HTTP response.
 */
 type ExitResponse struct {
 	Msg  string `json:"exit-message"`
@@ -15,7 +15,7 @@ type ExitResponse struct {
 }
 
 /*
-To return []byte mapped json response of ExitResponse/
+JSON returns []byte mapped json response of ExitResponse/
 */
 func (response ExitResponse) JSON() (jsonResponse []byte) {
 	jsonResponse, err := json.Marshal(response)
@@ -26,7 +26,7 @@ func (response ExitResponse) JSON() (jsonResponse []byte) {
 }
 
 /*
-For response handling at API Paths yet WIP.
+wip sets response handling at API Paths yet WIP.
 */
 func wip(ctx *gin.Context) {
 	ctx.Writer.Header().Add("Content-Type", "application/json")

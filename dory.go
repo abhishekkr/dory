@@ -21,6 +21,9 @@ func main() {
 	fmt.Println("bye .")
 }
 
+/*
+doryHelp to serve help file for Dory.
+*/
 func doryHelp(ctx *gin.Context) {
 	ctx.HTML(
 		http.StatusOK,
@@ -29,6 +32,9 @@ func doryHelp(ctx *gin.Context) {
 	)
 }
 
+/*
+ginCors to set required HTTP configs.
+*/
 func ginCors() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctx.Writer.Header().Add("Access-Control-Allow-Origin", "*")
@@ -36,6 +42,9 @@ func ginCors() gin.HandlerFunc {
 	}
 }
 
+/*
+ginHandleErrors to manage issues at server side.
+*/
 func ginHandleErrors(ctx *gin.Context) {
 	ctx.Next()
 	errorToPrint := ctx.Errors.ByType(gin.ErrorTypePublic).Last()
@@ -47,6 +56,9 @@ func ginHandleErrors(ctx *gin.Context) {
 	}
 }
 
+/*
+GinUp maps all routing logic and starts server.
+*/
 func GinUp(listenAt string) {
 	vault := doryBackend.NewVault(VaultAddr, VaultToken)
 	localAuth := doryBackend.NewLocalAuth("dory")
