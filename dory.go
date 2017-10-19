@@ -11,11 +11,19 @@ import (
 )
 
 var (
-	/* HTTPAt secifies server's listen-at config, can be overridden by env var DORY_HTTP. Defaults to '':8080'. */
+	/*
+		HTTPAt specifies server's listen-at config, can be overridden by env var DORY_HTTP. Defaults to '':8080'.
+	*/
 	HTTPAt = golenv.OverrideIfEnv("DORY_HTTP", ":8080")
-	/* VaultAddr is Vault Backend URI. Can be overridden by env var VAULT_ADDR. Defaults to 'http://127.0.0.1:8200'.*/
+
+	/*
+		VaultAddr is Vault Backend URI. Can be overridden by env var VAULT_ADDR. Defaults to 'http://127.0.0.1:8200'.
+	*/
 	VaultAddr = golenv.OverrideIfEnv("VAULT_ADDR", "http://127.0.0.1:8200")
-	/* VaultToken is Vault Root Token. Need to be overridden by env var VAULT_TOKEN. Defaults to unusable placeholder value.*/
+
+	/*
+		VaultToken is Vault Root Token. Need to be overridden by env var VAULT_TOKEN. Defaults to unusable placeholder value.
+	*/
 	VaultToken = golenv.OverrideIfEnv("VAULT_TOKEN", "configure-env-var-VAULT_TOKEN")
 )
 

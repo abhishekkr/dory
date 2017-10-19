@@ -1,5 +1,7 @@
 ## dory
 
+[![Go Report Card](https://goreportcard.com/badge/abhishekkr/dory)](https://goreportcard.com/report/abhishekkr/dory) [![Build Status](https://travis-ci.org/gojp/goreportcard.svg?branch=master)](https://travis-ci.org/gojp/goreportcard)
+
 quick try using docker [abhishekkr/dory:0.1-alpine](https://hub.docker.com/r/abhishekkr/dory/)
 
 ```
