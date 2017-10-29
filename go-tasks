@@ -8,7 +8,7 @@ cd $(dirname $0)
 MY_DIR=$(pwd)
 cd ${THIS_DIR}
 
-[[ -z "${MY_GOPATH}" ]] && export MY_GOPATH=$(basename $MY_DIR)
+[[ -z "${MY_GOPATH}" ]] && export MY_GOPATH="github.com/abhishekkr/dory"
 [[ -z "${GO_MAIN_FILE}" ]] && export GO_MAIN_FILE="main.go"
 
 # managing go deps
