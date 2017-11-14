@@ -2,10 +2,10 @@
 
 [![Go Report Card](https://goreportcard.com/badge/abhishekkr/dory)](https://goreportcard.com/report/abhishekkr/dory) [![Build Status](https://travis-ci.org/abhishekkr/dory.svg?branch=master)](https://travis-ci.org/abhishekkr/dory)
 
-quick try using docker [abhishekkr/dory:0.1-alpine](https://hub.docker.com/r/abhishekkr/dory/)
+quick try using docker [abhishekkr/dory:0.3-alpine](https://hub.docker.com/r/abhishekkr/dory/)
 
 ```
-docker run -it -p8080:8080 abhishekkr/dory:0.1-alpine
+docker run -it -p8080:8080 abhishekkr/dory:latest
 ```
 
 Share your secret with a fish that have short term memory.
@@ -15,15 +15,17 @@ When you run `dory`, webserver by default will be available at [:8080](http://lo
 
 Current Features:
 
-* provides local auth-store backed by `cache2go` and encrypted by AES crypto
-
-* allows POST, GET and DELETE for a `auth identifier path` (like `http://dory.local:8080/local-auth/:identifier`) to store, fetch and purge data
-
-* successful POST of data at `auth identifier path` returns reference `X-DORY-TOKEN` mapped with this `auth identifier path`, this token need to be sent as value of this header `X-DORY-TOKEN` for GET and DELETE.
-
-* created secret store have default TTL of 5minutes, custom TTL can be set as URL Param in POST request by value of `ttlsecond` in seconds
-
-* first GET of secret will purge it from store, unless GET Param `keep=true` is provided
+> * can also reach permanent (disk persisted, non-ttl) memories in Dory by providing `GET Param` as `persist=true`
+>
+> * provides local auth-store backed by `cache2go` and encrypted by AES crypto
+>
+> * allows POST, GET and DELETE for a `auth identifier path` (like `http://dory.local:8080/local-auth/:identifier`) to store, fetch and purge data
+>
+> * successful POST of data at `auth identifier path` returns reference `X-DORY-TOKEN` mapped with this `auth identifier path`, this token need to be sent as value of this header `X-DORY-TOKEN` for GET and DELETE.
+>
+> * created secret store have default TTL of 5minutes, custom TTL can be set as URL Param in POST request by value of `ttlsecond` in seconds
+>
+> * first GET of secret will purge it from store, unless GET Param `keep=true` is provided
 
 ---
 
@@ -49,6 +51,14 @@ Current Features:
 * How To Use LocalAuth
 
 > [curl example](w3assets/dory.sh)
+
+---
+
+building docker with custom local binary
+
+```
+docker build  -t abhishekkr/dory:alpha -f w3assets/Dockerfile .
+```
 
 ---
 

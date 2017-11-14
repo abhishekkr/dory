@@ -10,12 +10,9 @@ seperator(){
   echo "--------------------------------------"
 }
 
-local-auth-list(){
-  curl -vvskL \
-      --header "X-DORY-TOKEN: ${LOCAL_AUTH_TOKEN}" \
-      ${LOCAL_AUTH_ADDR}/local-auth
-
-  seperator
+local-auth-unset(){
+  unset LOCAL_AUTH_TOKEN
+  echo $LOCAL_AUTH_TOKEN
 }
 
 local-auth-mount(){
@@ -47,6 +44,39 @@ local-auth-unmount(){
       --header "X-DORY-TOKEN: ${LOCAL_AUTH_TOKEN}" \
       --request DELETE \
       ${LOCAL_AUTH_ADDR}/local-auth/${LOCAL_AUTH_PATH}
+
+  seperator
+}
+
+local-auth-mount-persist(){
+  cat > /tmp/secret <<PEOF
+{
+  "username": "postgres",
+  "password": "mostdiversedb"
+}
+PEOF
+
+  export LOCAL_AUTH_TOKEN=$(curl -skL -X POST --data @/tmp/secret "${LOCAL_AUTH_ADDR}/local-auth/${LOCAL_AUTH_PATH}?persist=true")
+
+  echo "auth-token: "$LOCAL_AUTH_TOKEN
+
+  seperator
+}
+
+local-auth-ls-persist(){
+  curl -skL \
+      --header "X-DORY-TOKEN: ${LOCAL_AUTH_TOKEN}" \
+      --request GET \
+      "${LOCAL_AUTH_ADDR}/local-auth/${LOCAL_AUTH_PATH}${LOCAL_AUTH_LS_HTTP_PARAMS}&persist=true"
+
+  seperator
+}
+
+local-auth-unmount-persist(){
+  curl -skL \
+      --header "X-DORY-TOKEN: ${LOCAL_AUTH_TOKEN}" \
+      --request DELETE \
+      ${LOCAL_AUTH_ADDR}/local-auth/${LOCAL_AUTH_PATH}?persist=true
 
   seperator
 }

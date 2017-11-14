@@ -83,14 +83,12 @@ func GinUp(listenAt string) {
 
 	router.GET("/help", doryHelp)
 
-	router.GET("/local-auth", localAuth.AuthList)
 	router.GET("/local-auth/:uuid", localAuth.Get)
 	router.POST("/local-auth/:uuid", localAuth.AuthMount)
 	router.DELETE("/local-auth/:uuid", localAuth.AuthUnmount)
 
 	alpha := router.Group("/alpha")
 	{
-		alpha.GET("/vault", vault.AuthList)
 		alpha.GET("/vault/:uuid", vault.Get)
 		alpha.POST("/vault/:uuid", vault.AuthMount)
 		alpha.DELETE("/vault/:uuid", vault.AuthUnmount)

@@ -3,3 +3,5 @@ github.com/abhishekkr/gol/golenv
 github.com/abhishekkr/gol/golcrypt
 github.com/gin-gonic/gin
 github.com/muesli/cache2go
+github.com/stretchr/testify/mock
+github.com/peterbourgon/diskv
