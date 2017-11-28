@@ -97,6 +97,10 @@ func (auth *LocalAuth) Get(dataStore DataStore) bool {
 		return false
 	}
 
+	if !auth.Exists(dataStore) {
+		return false
+	}
+
 	auth.Value.Cipher, err = dataStore.Value(auth.Name)
 
 	if err != nil {

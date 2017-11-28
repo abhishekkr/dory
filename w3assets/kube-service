@@ -1,0 +1,15 @@
+echo 'kind: Service
+apiVersion: v1
+metadata:
+  name: service-dory
+  annotations:
+    cloud.google.com/load-balancer-type: "Internal"
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+  selector:
+    app: dory
+  type: LoadBalancer
+' | kubectl create -f -
