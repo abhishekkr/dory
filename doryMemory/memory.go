@@ -1,13 +1,14 @@
 package doryMemory
 
 import (
-	"log"
+	"fmt"
 	"path"
 	"strconv"
 	"time"
 
 	golcrypt "github.com/abhishekkr/gol/golcrypt"
-	"github.com/abhishekkr/gol/golenv"
+	golenv "github.com/abhishekkr/gol/golenv"
+	gollog "github.com/abhishekkr/gol/gollog"
 	golrandom "github.com/abhishekkr/gol/golrandom"
 
 	"github.com/muesli/cache2go"
@@ -54,6 +55,7 @@ func NewDiskv(cacheName string) DataStore {
 Exists checks if a Auth-Path exists in Cache2Go Table.
 */
 func (auth *LocalAuth) Exists(dataStore DataStore) bool {
+	gollog.Debug(fmt.Sprintf("key '%s' exists: %q", auth.Name, dataStore.Exists(auth.Name)))
 	return dataStore.Exists(auth.Name)
 }
 
@@ -62,6 +64,7 @@ Set stores an encrypted value with random/provided Token at Auth-Path in Cache2G
 */
 func (auth *LocalAuth) Set(dataStore DataStore) bool {
 	if dataStore == nil {
+		gollog.Err(fmt.Sprintf("key '%s' sent to corrupted datastore", auth.Name))
 		return false
 	}
 	if auth.Value.Key == nil {
@@ -69,7 +72,7 @@ func (auth *LocalAuth) Set(dataStore DataStore) bool {
 	}
 
 	if err := auth.Value.Encrypt(); err != nil {
-		log.Println(err)
+		gollog.Err(err.Error())
 		return false
 	}
 	auth.Value.DataBlob = nil
@@ -81,6 +84,7 @@ func (auth *LocalAuth) Set(dataStore DataStore) bool {
 	ttl := time.Duration(auth.TTLSecond) * time.Second
 	dataStore.Add(auth.Name, ttl, []byte(auth.Value.Cipher))
 
+	gollog.Debug(fmt.Sprintf("SET - '%s' created with '%s'", auth.Name, auth.Value.Key))
 	return auth.Exists(dataStore)
 }
 
@@ -91,26 +95,32 @@ func (auth *LocalAuth) Get(dataStore DataStore) bool {
 	var err error
 
 	if dataStore == nil {
+		gollog.Err(fmt.Sprintf("GET - key '%s' asked from corrupted datastore", auth.Name))
 		return false
 	}
 	if auth.Value.Key == nil {
+		gollog.Err(fmt.Sprintf("GET - key '%s' asked with missing token", auth.Name))
 		return false
 	}
 
 	if !auth.Exists(dataStore) {
+		gollog.Err(fmt.Sprintf("GET - key '%s doesn't exist", auth.Name))
 		return false
 	}
 
 	auth.Value.Cipher, err = dataStore.Value(auth.Name)
 
 	if err != nil {
+		gollog.Err(fmt.Sprintf("GET - key '%s' asked with wrong token", auth.Name))
 		return false
 	}
 
 	if err = auth.Value.Decrypt(); err != nil {
-		log.Println("failed to decrypt;", err)
+		gollog.Err(fmt.Sprintf("GET - failed to decrypt - %q", err.Error()))
 		return false
 	}
+
+	gollog.Debug(fmt.Sprintf("GET - key '%s' fetched with %s", auth.Name, auth.Value.Key))
 
 	return true
 }
@@ -122,22 +132,22 @@ func (auth *LocalAuth) Delete(dataStore DataStore) bool {
 	var err error
 
 	if dataStore == nil {
-		log.Println("delete triggered for missing auth-store")
+		gollog.Err("delete triggered for missing auth-store")
 		return false
 	}
 	if auth.Value.Key == nil {
-		log.Println("delete triggered for empty key")
+		gollog.Err("delete triggered for empty key")
 		return false
 	}
 	if !auth.Exists(dataStore) {
-		log.Println("delete triggered for missing auth identifier")
+		gollog.Err("delete triggered for missing auth identifier")
 		return false
 	}
 
 	auth.Value.Cipher, err = dataStore.Value(auth.Name)
 
 	if err = auth.Value.Decrypt(); err != nil {
-		log.Println("to delete decrypt shall pass;", err)
+		gollog.Err(fmt.Sprintf("DEL - to delete decrypt shall pass - %s", err))
 		return false
 	}
 	auth.Value.Cipher = nil
@@ -145,9 +155,10 @@ func (auth *LocalAuth) Delete(dataStore DataStore) bool {
 
 	err = dataStore.Delete(auth.Name)
 	if err != nil {
-		log.Println("delete triggered but", err)
+		gollog.Err(fmt.Sprintf("DEL - %s", err))
 		return false
 	}
 
+	gollog.Debug(fmt.Sprintf("DEL - key '%s' deleted", auth.Name))
 	return true
 }
