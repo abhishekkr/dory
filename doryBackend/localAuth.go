@@ -5,11 +5,14 @@ Local Auth Backend for Dory
 */
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 
 	doryMemory "github.com/abhishekkr/dory/doryMemory"
+
+	"github.com/abhishekkr/gol/gollog"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,7 +27,7 @@ type LocalAuth struct {
 }
 
 /*
-NewLocalAuth instantiates and return a LocalAuth struct in reference to any usable Vault backend.
+NewLocalAuth instantiates and return a LocalAuth struct in reference to any usable secret backend.
 */
 func NewLocalAuth(cacheName string) LocalAuth {
 	localAuth := LocalAuth{
@@ -64,6 +67,8 @@ func (localAuth LocalAuth) Get(ctx *gin.Context) {
 			ctx.JSON(500, ExitResponse{Msg: "auth identifier purge failed", Data: response})
 			return
 		}
+	} else {
+		gollog.Debug(fmt.Sprintf("GET - key '%s' is queried to be not purged", localAuthItem.Name))
 	}
 
 	ctx.Writer.WriteHeader(http.StatusOK)
@@ -75,14 +80,17 @@ AuthMount stores a secret mapped with a new auth-path only at Local-Auth with un
 */
 func (localAuth LocalAuth) AuthMount(ctx *gin.Context) {
 	var datastore doryMemory.DataStore
-	if ctx.DefaultQuery("persist", "false") == "false" {
-		datastore = localAuth.Cache
-	} else {
-		datastore = localAuth.Disk
-	}
 
 	localAuthItem := localAuth.Item
 	localAuthItem.Name = ctx.Param("uuid")
+
+	if ctx.DefaultQuery("persist", "false") == "false" {
+		gollog.Debug(fmt.Sprintf("SET - key '%s' is provided for memory store with expiry", localAuthItem.Name))
+		datastore = localAuth.Cache
+	} else {
+		gollog.Debug(fmt.Sprintf("SET - key '%s' is provided for long-term disk store", localAuthItem.Name))
+		datastore = localAuth.Disk
+	}
 
 	if localAuthItem.Exists(datastore) {
 		ctx.JSON(409, ExitResponse{Msg: "auth identifier conflict"})
@@ -99,8 +107,14 @@ func (localAuth LocalAuth) AuthMount(ctx *gin.Context) {
 
 	localAuthItem.Value.DataBlob, err = ioutil.ReadAll(ctx.Request.Body)
 	if err != nil {
+		gollog.Err(fmt.Sprintf("SET - key '%s' had failure to read it's data", localAuthItem.Name))
 		ctx.Writer.Header().Add("Content-Type", "application/json")
 		ctx.JSON(400, ExitResponse{Msg: err.Error()})
+		return
+	}
+	if len(localAuthItem.Value.DataBlob) == 0 {
+		gollog.Err(fmt.Sprintf("SET - key '%s' is provided with empty data", localAuthItem.Name))
+		ctx.JSON(400, ExitResponse{Msg: "empty data blob recieved"})
 		return
 	}
 
