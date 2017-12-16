@@ -7,6 +7,8 @@ import (
 	doryBackend "github.com/abhishekkr/dory/doryBackend"
 
 	golenv "github.com/abhishekkr/gol/golenv"
+	gollog "github.com/abhishekkr/gol/gollog"
+
 	gin "github.com/gin-gonic/gin"
 )
 
@@ -15,16 +17,6 @@ var (
 		HTTPAt specifies server's listen-at config, can be overridden by env var DORY_HTTP. Defaults to '':8080'.
 	*/
 	HTTPAt = golenv.OverrideIfEnv("DORY_HTTP", ":8080")
-
-	/*
-		VaultAddr is Vault Backend URI. Can be overridden by env var VAULT_ADDR. Defaults to 'http://127.0.0.1:8200'.
-	*/
-	VaultAddr = golenv.OverrideIfEnv("VAULT_ADDR", "http://127.0.0.1:8200")
-
-	/*
-		VaultToken is Vault Root Token. Need to be overridden by env var VAULT_TOKEN. Defaults to unusable placeholder value.
-	*/
-	VaultToken = golenv.OverrideIfEnv("VAULT_TOKEN", "configure-env-var-VAULT_TOKEN")
 )
 
 func main() {
@@ -71,11 +63,11 @@ func ginHandleErrors(ctx *gin.Context) {
 GinUp maps all routing logic and starts server.
 */
 func GinUp(listenAt string) {
-	vault := doryBackend.NewVault(VaultAddr, VaultToken)
 	localAuth := doryBackend.NewLocalAuth("dory")
 
 	router := gin.Default()
 	router.Use(ginHandleErrors)
+	router.Use(gollog.GinLogrus(), gin.Recovery())
 	router.Use(ginCors())
 	router.LoadHTMLGlob("templates/*")
 	router.Static("/images", "w3assets/images")
@@ -86,13 +78,6 @@ func GinUp(listenAt string) {
 	router.GET("/local-auth/:uuid", localAuth.Get)
 	router.POST("/local-auth/:uuid", localAuth.AuthMount)
 	router.DELETE("/local-auth/:uuid", localAuth.AuthUnmount)
-
-	alpha := router.Group("/alpha")
-	{
-		alpha.GET("/vault/:uuid", vault.Get)
-		alpha.POST("/vault/:uuid", vault.AuthMount)
-		alpha.DELETE("/vault/:uuid", vault.AuthUnmount)
-	}
 
 	router.Run(listenAt)
 }
