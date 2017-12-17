@@ -3,9 +3,9 @@
 
 > Share your secret with a fish that have short term memory.
 
-* [HowTo Use ~ quick try-out with it's docker]()
+* [HowTo Use ~ quick try-out with it's docker](/usage)
 
-* [Development Workflow ~ run a local copy and try local changes]()
+* [Development Workflow ~ run a local copy and try local changes](/development)
 
 #### Current Features:
 

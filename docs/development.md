@@ -9,6 +9,7 @@
 ./go-tasks deps
 ```
 
+---
 
 * How To Build
 
@@ -21,14 +22,15 @@
 ./go-tasks build
 ```
 
+---
 
 * How To Use LocalAuth
 
-> [curl example](w3assets/dory.sh)
+> [curl example](https://github.com/abhishekkr/dory/blob/master/w3assets/dory.sh)
 
 ---
 
-building docker with custom local binary
+* Building docker with custom local binary
 
 ```
 docker build  -t abhishekkr/dory:alpha -f w3assets/Dockerfile .
