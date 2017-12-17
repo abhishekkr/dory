@@ -3,9 +3,9 @@
 
 > Share your secret with a fish that have short term memory.
 
-* [HowTo Use ~ quick try-out with it's docker](/usage)
+* [HowTo Use ~ quick try-out with it's docker](./usage)
 
-* [Development Workflow ~ run a local copy and try local changes](/development)
+* [Development Workflow ~ run a local copy and try local changes](./development)
 
 #### Current Features:
 
@@ -23,8 +23,8 @@
 
 ---
 
-![image of dory](w3assets/images/dory-1024px.jpg)
+![image of dory](https://github.com/abhishekkr/dory/blob/master/w3assets/images/dory-1024px.jpg)
 
-[MIT Licensed](./LICENSE)
+[MIT Licensed](https://github.com/abhishekkr/dory/blob/master/LICENSE)
 
 ---
