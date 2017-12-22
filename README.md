@@ -2,7 +2,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/abhishekkr/dory)](https://goreportcard.com/report/abhishekkr/dory) [![Build Status](https://travis-ci.org/abhishekkr/dory.svg?branch=master)](https://travis-ci.org/abhishekkr/dory)
 
-quick try using docker [abhishekkr/dory:0.3-alpine](https://hub.docker.com/r/abhishekkr/dory/)
+quick try using docker [abhishekkr/dory:1.0-alpine](https://hub.docker.com/r/abhishekkr/dory/)
 
 ```
 docker run -it -p8080:8080 abhishekkr/dory:latest
@@ -15,6 +15,10 @@ When you run `dory`, webserver by default will be available at [:8080](http://lo
 
 Current Features:
 
+> * added `/ping` api listing count of keys in cache and disk
+>
+> * blind list and purge of keys over `/admin/store/{cache,disk}` api using Admin Token; `just a reminder that value is not recoverable using Admin Token`
+>
 > * can also reach permanent (disk persisted, non-ttl) memories in Dory by providing `GET Param` as `persist=true`
 >
 > * provides local auth-store backed by `cache2go` and encrypted by AES crypto
