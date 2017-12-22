@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 
 	doryBackend "github.com/abhishekkr/dory/doryBackend"
 
@@ -22,17 +21,6 @@ var (
 func main() {
 	GinUp(HTTPAt)
 	fmt.Println("bye .")
-}
-
-/*
-doryHelp to serve help file for Dory.
-*/
-func doryHelp(ctx *gin.Context) {
-	ctx.HTML(
-		http.StatusOK,
-		"help.html",
-		gin.H{"title": "Help"},
-	)
 }
 
 /*
@@ -73,11 +61,16 @@ func GinUp(listenAt string) {
 	router.Static("/images", "w3assets/images")
 	router.StaticFile("/favicon.ico", "w3assets/favicon.ico")
 
-	router.GET("/help", doryHelp)
+	router.GET("/help", doryBackend.DoryHelp)
+
+	router.GET("/ping", localAuth.DoryPing)
 
 	router.GET("/local-auth/:uuid", localAuth.Get)
 	router.POST("/local-auth/:uuid", localAuth.AuthMount)
 	router.DELETE("/local-auth/:uuid", localAuth.AuthUnmount)
+
+	router.GET("/admin/store/:datastore", localAuth.List)
+	router.DELETE("/admin/store/:datastore", localAuth.Purge)
 
 	router.Run(listenAt)
 }

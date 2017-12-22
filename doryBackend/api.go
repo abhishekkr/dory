@@ -2,6 +2,7 @@ package doryBackend
 
 import (
 	"encoding/json"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,9 +29,20 @@ func (response ExitResponse) JSON() (jsonResponse []byte) {
 /*
 wip sets response handling at API Paths yet WIP.
 */
-func wip(ctx *gin.Context) {
+func Wip(ctx *gin.Context) {
 	ctx.Writer.Header().Add("Content-Type", "application/json")
 
 	response := ExitResponse{Msg: "WIP"}
 	ctx.JSON(200, response)
+}
+
+/*
+doryHelp to serve help file for Dory.
+*/
+func DoryHelp(ctx *gin.Context) {
+	ctx.HTML(
+		http.StatusOK,
+		"help.html",
+		gin.H{"title": "Help"},
+	)
 }

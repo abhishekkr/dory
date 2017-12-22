@@ -12,9 +12,15 @@ import (
 
 	doryMemory "github.com/abhishekkr/dory/doryMemory"
 
+	"github.com/abhishekkr/gol/golenv"
+	"github.com/abhishekkr/gol/golerror"
 	"github.com/abhishekkr/gol/gollog"
 
 	"github.com/gin-gonic/gin"
+)
+
+var (
+	DORY_ADMIN_TOKEN = golenv.OverrideIfEnv("DORY_ADMIN_TOKEN", "")
 )
 
 /*
@@ -38,13 +44,39 @@ func NewLocalAuth(cacheName string) LocalAuth {
 	return localAuth
 }
 
-func (localAuth LocalAuth) ctxDatastore(ctx *gin.Context) (datastore doryMemory.DataStore) {
+func (localAuth LocalAuth) ctxPersist(ctx *gin.Context) (datastore doryMemory.DataStore) {
 	if ctx.DefaultQuery("persist", "false") == "false" {
-		gollog.Debug(fmt.Sprintf("SET - key '%s' is provided for memory store with expiry", localAuth.Item.Name))
+		gollog.Debug(fmt.Sprintf("key '%s' is provided for memory store with expiry", localAuth.Item.Name))
 		datastore = localAuth.Cache
 	} else {
-		gollog.Debug(fmt.Sprintf("SET - key '%s' is provided for long-term disk store", localAuth.Item.Name))
+		gollog.Debug(fmt.Sprintf("key '%s' is provided for long-term disk store", localAuth.Item.Name))
 		datastore = localAuth.Disk
+	}
+	return
+}
+
+func (localAuth LocalAuth) ctxDatastore(ctx *gin.Context) (datastore doryMemory.DataStore, err error) {
+	datastoreType := ctx.Param("datastore")
+	if datastoreType == "cache" {
+		datastore = localAuth.Cache
+	} else if datastoreType == "disk" {
+		datastore = localAuth.Disk
+	} else {
+		err = golerror.Error(123, fmt.Sprintf("store %s is not allowed, only 'cache' and 'disk' are allowed"))
+	}
+	return
+}
+
+func (localAuth LocalAuth) ctxAdminToken(ctx *gin.Context) (err error) {
+	adminToken := ctx.Request.Header.Get("X-DORY-ADMIN-TOKEN")
+
+	if len(DORY_ADMIN_TOKEN) < 256 {
+		err = golerror.Error(123, "configured admin token length is less than 64 chars, not allowed")
+		return
+	}
+	if DORY_ADMIN_TOKEN != adminToken {
+		err = golerror.Error(123, "provided admin token doesn't match configured token")
+		return
 	}
 	return
 }
@@ -53,7 +85,7 @@ func (localAuth LocalAuth) ctxDatastore(ctx *gin.Context) (datastore doryMemory.
 Get fetchs required auth mapped secret from Local-Auth backend.
 */
 func (localAuth LocalAuth) Get(ctx *gin.Context) {
-	datastore := localAuth.ctxDatastore(ctx)
+	datastore := localAuth.ctxPersist(ctx)
 
 	localAuthItem := localAuth.Item
 
@@ -85,7 +117,7 @@ func (localAuth LocalAuth) Get(ctx *gin.Context) {
 AuthMount stores a secret mapped with a new auth-path only at Local-Auth with unique auth-token.
 */
 func (localAuth LocalAuth) AuthMount(ctx *gin.Context) {
-	datastore := localAuth.ctxDatastore(ctx)
+	datastore := localAuth.ctxPersist(ctx)
 
 	localAuthItem := localAuth.Item
 	localAuthItem.Name = ctx.Param("uuid")
@@ -128,7 +160,7 @@ func (localAuth LocalAuth) AuthMount(ctx *gin.Context) {
 AuthUnmount purges a previously local-auth stored mapped to a auth-path if not yet purged by TTL.
 */
 func (localAuth LocalAuth) AuthUnmount(ctx *gin.Context) {
-	datastore := localAuth.ctxDatastore(ctx)
+	datastore := localAuth.ctxPersist(ctx)
 
 	ctx.Writer.Header().Add("Content-Type", "application/json")
 
@@ -142,4 +174,59 @@ func (localAuth LocalAuth) AuthUnmount(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, ExitResponse{Msg: "success"})
+}
+
+/*
+List shows all keys registered with Dory for datatsore enquired.
+*/
+func (localAuth LocalAuth) List(ctx *gin.Context) {
+	var err error
+	ctx.Writer.Header().Add("Content-Type", "application/json")
+
+	datastore, err := localAuth.ctxDatastore(ctx)
+	if err != nil {
+		ctx.JSON(500, ExitResponse{Msg: err.Error()})
+		return
+	}
+
+	err = localAuth.ctxAdminToken(ctx)
+	if err != nil {
+		ctx.JSON(500, ExitResponse{Msg: err.Error()})
+		return
+	}
+
+	ctx.JSON(200, datastore.List())
+}
+
+/*
+Purge removes all keys from datastore enquired, without decryption required.
+*/
+func (localAuth LocalAuth) Purge(ctx *gin.Context) {
+	ctx.Writer.Header().Add("Content-Type", "application/json")
+
+	datastore, err := localAuth.ctxDatastore(ctx)
+	if err != nil {
+		ctx.JSON(500, ExitResponse{Msg: err.Error()})
+		return
+	}
+
+	err = localAuth.ctxAdminToken(ctx)
+	if err != nil {
+		ctx.JSON(500, ExitResponse{Msg: err.Error()})
+		return
+	}
+
+	ctx.JSON(200, datastore.Purge())
+}
+
+/*
+doryPing to return status for Dory
+*/
+func (localAuth LocalAuth) DoryPing(ctx *gin.Context) {
+	ping := map[string]string{
+		"keys-in-cache": fmt.Sprintf("%d", localAuth.Cache.Count()),
+		"keys-in-disk":  fmt.Sprintf("%d", localAuth.Disk.Count()),
+	}
+
+	ctx.JSON(200, ping)
 }

@@ -42,7 +42,7 @@ func (cache *Cache2Go) List() []string {
 	keyIndex := 0
 	keyList := make([]string, cache.CacheTable.Count())
 	cache.CacheTable.Foreach(func(key interface{}, item *cache2go.CacheItem) {
-		keyList[keyIndex] = fmt.Sprintf("%q", key)
+		keyList[keyIndex] = fmt.Sprintf("%s", key)
 		keyIndex += 1
 	})
 	return keyList
