@@ -55,7 +55,7 @@ func NewDiskv(cacheName string) DataStore {
 Exists checks if a Auth-Path exists in Cache2Go Table.
 */
 func (auth *LocalAuth) Exists(dataStore DataStore) bool {
-	gollog.Debug(fmt.Sprintf("key '%s' exists: %q", auth.Name, dataStore.Exists(auth.Name)))
+	gollog.Debug(fmt.Sprintf("key '%s' exists: %t", auth.Name, dataStore.Exists(auth.Name)))
 	return dataStore.Exists(auth.Name)
 }
 
@@ -95,33 +95,30 @@ func (auth *LocalAuth) Get(dataStore DataStore) bool {
 	var err error
 
 	if dataStore == nil {
-		gollog.Err(fmt.Sprintf("GET - key '%s' asked from corrupted datastore", auth.Name))
+		gollog.Err(fmt.Sprintf("key '%s' asked from corrupted datastore", auth.Name))
 		return false
 	}
 	if auth.Value.Key == nil {
-		gollog.Err(fmt.Sprintf("GET - key '%s' asked with missing token", auth.Name))
+		gollog.Err(fmt.Sprintf("key '%s' asked with missing token", auth.Name))
 		return false
 	}
-
 	if !auth.Exists(dataStore) {
-		gollog.Err(fmt.Sprintf("GET - key '%s doesn't exist", auth.Name))
+		gollog.Err(fmt.Sprintf("key '%s doesn't exist", auth.Name))
 		return false
 	}
 
 	auth.Value.Cipher, err = dataStore.Value(auth.Name)
-
 	if err != nil {
-		gollog.Err(fmt.Sprintf("GET - key '%s' asked with wrong token", auth.Name))
+		gollog.Err(fmt.Sprintf("key '%s' asked with wrong token", auth.Name))
 		return false
 	}
 
 	if err = auth.Value.Decrypt(); err != nil {
-		gollog.Err(fmt.Sprintf("GET - failed to decrypt - %q", err.Error()))
+		gollog.Err(fmt.Sprintf("failed to decrypt - %q", err.Error()))
 		return false
 	}
 
-	gollog.Debug(fmt.Sprintf("GET - key '%s' fetched with %s", auth.Name, auth.Value.Key))
-
+	gollog.Debug(fmt.Sprintf("key '%s' fetched with %s", auth.Name, auth.Value.Key))
 	return true
 }
 
@@ -131,34 +128,19 @@ Delete purges a Auth-Path in Cache2Go Table, if it's value is decipherable by gi
 func (auth *LocalAuth) Delete(dataStore DataStore) bool {
 	var err error
 
-	if dataStore == nil {
-		gollog.Err("delete triggered for missing auth-store")
-		return false
-	}
-	if auth.Value.Key == nil {
-		gollog.Err("delete triggered for empty key")
-		return false
-	}
-	if !auth.Exists(dataStore) {
-		gollog.Err("delete triggered for missing auth identifier")
+	if !auth.Get(dataStore) {
 		return false
 	}
 
-	auth.Value.Cipher, err = dataStore.Value(auth.Name)
-
-	if err = auth.Value.Decrypt(); err != nil {
-		gollog.Err(fmt.Sprintf("DEL - to delete decrypt shall pass - %s", err))
-		return false
-	}
 	auth.Value.Cipher = nil
 	auth.Value.DataBlob = nil
 
 	err = dataStore.Delete(auth.Name)
 	if err != nil {
-		gollog.Err(fmt.Sprintf("DEL - %s", err))
+		gollog.Err(fmt.Sprintf("delete failed for %s because %s", auth.Name, err))
 		return false
 	}
 
-	gollog.Debug(fmt.Sprintf("DEL - key '%s' deleted", auth.Name))
+	gollog.Debug(fmt.Sprintf("key '%s' deleted", auth.Name))
 	return true
 }

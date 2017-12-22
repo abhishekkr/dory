@@ -23,7 +23,7 @@
 
 ---
 
-![image of dory](https://github.com/abhishekkr/dory/blob/master/w3assets/images/dory-1024px.jpg)
+![image of dory](https://github.com/abhishekkr/dory/raw/master/w3assets/images/dory-1024px.jpg)
 
 [MIT Licensed](https://github.com/abhishekkr/dory/blob/master/LICENSE)
 

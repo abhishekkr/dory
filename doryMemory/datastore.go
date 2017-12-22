@@ -15,4 +15,8 @@ type DataStore interface {
 	Delete(string) error
 	Exists(string) bool
 	Value(string) ([]byte, error)
+
+	List() []string
+	Count() int
+	Purge() error
 }

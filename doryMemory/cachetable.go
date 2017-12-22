@@ -1,6 +1,7 @@
 package doryMemory
 
 import (
+	"fmt"
 	"time"
 
 	golcrypt "github.com/abhishekkr/gol/golcrypt"
@@ -35,4 +36,24 @@ func (cache *Cache2Go) Value(key string) ([]byte, error) {
 
 	cipherData = cipherCacheItem.Data().([]byte)
 	return cipherData, err
+}
+
+func (cache *Cache2Go) List() []string {
+	keyIndex := 0
+	keyList := make([]string, cache.CacheTable.Count())
+	cache.CacheTable.Foreach(func(key interface{}, item *cache2go.CacheItem) {
+		keyList[keyIndex] = fmt.Sprintf("%q", key)
+		keyIndex += 1
+	})
+	return keyList
+}
+
+func (cache *Cache2Go) Count() int {
+	return cache.CacheTable.Count()
+}
+
+func (cache *Cache2Go) Purge() error {
+	var err error
+	cache.CacheTable.Flush()
+	return err
 }

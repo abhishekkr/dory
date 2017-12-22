@@ -1,4 +1,6 @@
 
+> [home][./index] [howto](./usage)
+
 ### Development Workflow
 
 [![Go Report Card](https://goreportcard.com/badge/abhishekkr/dory)](https://goreportcard.com/report/abhishekkr/dory) [![Build Status](https://travis-ci.org/abhishekkr/dory.svg?branch=master)](https://travis-ci.org/abhishekkr/dory)

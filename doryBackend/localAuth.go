@@ -38,16 +38,22 @@ func NewLocalAuth(cacheName string) LocalAuth {
 	return localAuth
 }
 
+func (localAuth LocalAuth) ctxDatastore(ctx *gin.Context) (datastore doryMemory.DataStore) {
+	if ctx.DefaultQuery("persist", "false") == "false" {
+		gollog.Debug(fmt.Sprintf("SET - key '%s' is provided for memory store with expiry", localAuth.Item.Name))
+		datastore = localAuth.Cache
+	} else {
+		gollog.Debug(fmt.Sprintf("SET - key '%s' is provided for long-term disk store", localAuth.Item.Name))
+		datastore = localAuth.Disk
+	}
+	return
+}
+
 /*
 Get fetchs required auth mapped secret from Local-Auth backend.
 */
 func (localAuth LocalAuth) Get(ctx *gin.Context) {
-	var datastore doryMemory.DataStore
-	if ctx.DefaultQuery("persist", "false") == "false" {
-		datastore = localAuth.Cache
-	} else {
-		datastore = localAuth.Disk
-	}
+	datastore := localAuth.ctxDatastore(ctx)
 
 	localAuthItem := localAuth.Item
 
@@ -79,18 +85,10 @@ func (localAuth LocalAuth) Get(ctx *gin.Context) {
 AuthMount stores a secret mapped with a new auth-path only at Local-Auth with unique auth-token.
 */
 func (localAuth LocalAuth) AuthMount(ctx *gin.Context) {
-	var datastore doryMemory.DataStore
+	datastore := localAuth.ctxDatastore(ctx)
 
 	localAuthItem := localAuth.Item
 	localAuthItem.Name = ctx.Param("uuid")
-
-	if ctx.DefaultQuery("persist", "false") == "false" {
-		gollog.Debug(fmt.Sprintf("SET - key '%s' is provided for memory store with expiry", localAuthItem.Name))
-		datastore = localAuth.Cache
-	} else {
-		gollog.Debug(fmt.Sprintf("SET - key '%s' is provided for long-term disk store", localAuthItem.Name))
-		datastore = localAuth.Disk
-	}
 
 	if localAuthItem.Exists(datastore) {
 		ctx.JSON(409, ExitResponse{Msg: "auth identifier conflict"})
@@ -130,12 +128,7 @@ func (localAuth LocalAuth) AuthMount(ctx *gin.Context) {
 AuthUnmount purges a previously local-auth stored mapped to a auth-path if not yet purged by TTL.
 */
 func (localAuth LocalAuth) AuthUnmount(ctx *gin.Context) {
-	var datastore doryMemory.DataStore
-	if ctx.DefaultQuery("persist", "false") == "false" {
-		datastore = localAuth.Cache
-	} else {
-		datastore = localAuth.Disk
-	}
+	datastore := localAuth.ctxDatastore(ctx)
 
 	ctx.Writer.Header().Add("Content-Type", "application/json")
 

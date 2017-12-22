@@ -31,3 +31,33 @@ func (kvstore *Diskv) Delete(key string) error {
 func (kvstore *Diskv) Value(key string) ([]byte, error) {
 	return kvstore.KV.Read(key)
 }
+
+func (kvstore *Diskv) List() []string {
+	keyIndex := 0
+	keyCount := kvstore.Count()
+	keyList := make([]string, keyCount)
+	for key := range kvstore.KV.Keys(nil) {
+		keyList[keyIndex] = key
+		keyIndex += 1
+	}
+	return keyList
+}
+
+func (kvstore *Diskv) Count() int {
+	var keyCount int
+	for range kvstore.KV.Keys(nil) {
+		keyCount += 1
+	}
+	return keyCount
+}
+
+func (kvstore *Diskv) Purge() error {
+	var err error
+	for key := range kvstore.KV.Keys(nil) {
+		err = kvstore.KV.Erase(key)
+		if err != nil {
+			break
+		}
+	}
+	return err
+}
