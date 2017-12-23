@@ -1,5 +1,5 @@
 
-> [home][./index] [howto](./usage)
+> [home](./index) [howto](./usage)
 
 ### Development Workflow
 
