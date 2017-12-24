@@ -7,8 +7,8 @@ import (
 	"os"
 
 	doryBackend "github.com/abhishekkr/dory/doryBackend"
+	doryClient "github.com/abhishekkr/dory/doryClient"
 
-	golcrypt "github.com/abhishekkr/gol/golcrypt"
 	golenv "github.com/abhishekkr/gol/golenv"
 	gollog "github.com/abhishekkr/gol/gollog"
 
@@ -39,12 +39,12 @@ func main() {
 	if *doryMode == "server" {
 		gollog.Debug("starting dory as server")
 		ginUp(HTTPAt)
+		gollog.Debug("bye .")
 	} else if *doryMode == "client" {
-		doryClient()
+		doryCli()
 	} else {
 		gollog.Err(fmt.Sprintf("wrong run mode '%s' passed to dory", *doryMode))
 	}
-	gollog.Debug("bye .")
 }
 
 /*
@@ -102,10 +102,10 @@ func ginUp(listenAt string) {
 /*
 doryClient handles calling dory from commandline
 */
-func doryClient() {
+func doryCli() {
 	var err error
 
-	goldory := golcrypt.Dory{
+	goldory := doryClient.DoryClient{
 		BaseUrl:       *doryUrl,
 		Key:           *doryKey,
 		Token:         *doryToken,
@@ -124,5 +124,5 @@ func doryClient() {
 		}
 	}
 
-	doryBackend.HandleClientAuth(goldory, *doryClientAxn)
+	doryClient.HandleClientAuth(goldory, *doryClientAxn)
 }
