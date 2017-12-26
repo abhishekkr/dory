@@ -71,6 +71,29 @@ func ginHandleErrors(ctx *gin.Context) {
 	}
 }
 
+func ginUpLocalAuth(router *gin.Engine, localAuth *doryBackend.LocalAuth) {
+	localAuthAPI := router.Group("/local-auth")
+	{
+		localAuthAPI.GET("/:uuid", localAuth.Get)
+		localAuthAPI.POST("/:uuid", localAuth.AuthMount)
+		localAuthAPI.DELETE("/:uuid", localAuth.AuthUnmount)
+	}
+
+	localCacheAPI := router.Group("/local-cache")
+	{
+		localCacheAPI.GET("/:uuid", localAuth.Get)
+		localCacheAPI.POST("/:uuid", localAuth.AuthMount)
+		localCacheAPI.DELETE("/:uuid", localAuth.AuthUnmount)
+	}
+
+	localDiskAPI := router.Group("/local-disk")
+	{
+		localDiskAPI.GET("/:uuid", localAuth.Get)
+		localDiskAPI.POST("/:uuid", localAuth.AuthMount)
+		localDiskAPI.DELETE("/:uuid", localAuth.AuthUnmount)
+	}
+}
+
 /*
 ginUp maps all routing logic and starts server.
 */
@@ -89,12 +112,14 @@ func ginUp(listenAt string) {
 
 	router.GET("/ping", localAuth.DoryPing)
 
-	router.GET("/local-auth/:uuid", localAuth.Get)
-	router.POST("/local-auth/:uuid", localAuth.AuthMount)
-	router.DELETE("/local-auth/:uuid", localAuth.AuthUnmount)
+	ginUpLocalAuth(router, &localAuth)
 
-	router.GET("/admin/store/:datastore", localAuth.List)
-	router.DELETE("/admin/store/:datastore", localAuth.Purge)
+	adminStoreAPI := router.Group("/admin/store")
+	{
+		adminStoreAPI.GET("/:datastore", localAuth.List)
+		adminStoreAPI.DELETE("/:datastore", localAuth.Purge)
+		adminStoreAPI.DELETE("/:datastore/:uuid", localAuth.PurgeOne)
+	}
 
 	router.Run(listenAt)
 }

@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 
 	doryMemory "github.com/abhishekkr/dory/doryMemory"
 
@@ -45,6 +46,18 @@ func NewLocalAuth(cacheName string) LocalAuth {
 }
 
 func (localAuth LocalAuth) ctxPersist(ctx *gin.Context) (datastore doryMemory.DataStore) {
+	requestURI := ctx.Request.RequestURI
+	requestAt := strings.Split(requestURI, "/")[1]
+	if requestAt == "local-cache" {
+		gollog.Debug(fmt.Sprintf("key '%s' is provided for memory store with expiry", localAuth.Item.Name))
+		datastore = localAuth.Cache
+		return
+	} else if requestAt == "local-disk" {
+		gollog.Debug(fmt.Sprintf("key '%s' is provided for long-term disk store", localAuth.Item.Name))
+		datastore = localAuth.Disk
+		return
+	}
+
 	if ctx.DefaultQuery("persist", "false") == "false" {
 		gollog.Debug(fmt.Sprintf("key '%s' is provided for memory store with expiry", localAuth.Item.Name))
 		datastore = localAuth.Cache
@@ -87,30 +100,28 @@ Get fetchs required auth mapped secret from Local-Auth backend.
 func (localAuth LocalAuth) Get(ctx *gin.Context) {
 	datastore := localAuth.ctxPersist(ctx)
 
-	localAuthItem := localAuth.Item
-
-	localAuthItem.Name = ctx.Param("uuid")
-	localAuthItem.Value.Key = []byte(ctx.Request.Header.Get("X-DORY-TOKEN"))
+	localAuth.Item.Name = ctx.Param("uuid")
+	localAuth.Item.Value.Key = []byte(ctx.Request.Header.Get("X-DORY-TOKEN"))
 
 	if localAuth.Item.Name == "" {
 		ctx.JSON(500, ExitResponse{Msg: "passed uuid is empty"})
 		return
 	}
-	if !localAuthItem.Get(datastore) {
+	if !localAuth.Item.Get(datastore) {
 		ctx.Writer.Header().Add("Content-Type", "application/json")
 		ctx.JSON(500, ExitResponse{Msg: "get for required auth identifier failed"})
 		return
 	}
 
-	response := localAuthItem.Value.DataBlob
+	response := localAuth.Item.Value.DataBlob
 
 	if ctx.DefaultQuery("keep", "false") == "false" {
-		if !localAuthItem.Delete(datastore) {
+		if !localAuth.Item.Delete(datastore) {
 			ctx.JSON(500, ExitResponse{Msg: "auth identifier purge failed", Data: response})
 			return
 		}
 	} else {
-		gollog.Debug(fmt.Sprintf("GET - key '%s' is queried to be not purged", localAuthItem.Name))
+		gollog.Debug(fmt.Sprintf("GET - key '%s' is queried to be not purged", localAuth.Item.Name))
 	}
 
 	ctx.Writer.WriteHeader(http.StatusOK)
@@ -123,14 +134,13 @@ AuthMount stores a secret mapped with a new auth-path only at Local-Auth with un
 func (localAuth LocalAuth) AuthMount(ctx *gin.Context) {
 	datastore := localAuth.ctxPersist(ctx)
 
-	localAuthItem := localAuth.Item
-	localAuthItem.Name = ctx.Param("uuid")
+	localAuth.Item.Name = ctx.Param("uuid")
 
 	if localAuth.Item.Name == "" {
 		ctx.JSON(500, ExitResponse{Msg: "passed uuid is empty"})
 		return
 	}
-	if localAuthItem.Exists(datastore) {
+	if localAuth.Item.Exists(datastore) {
 		ctx.JSON(409, ExitResponse{Msg: "auth identifier conflict"})
 		return
 	}
@@ -141,27 +151,27 @@ func (localAuth LocalAuth) AuthMount(ctx *gin.Context) {
 		ctx.JSON(400, ExitResponse{Msg: err.Error()})
 		return
 	}
-	localAuthItem.TTLSecond = uint64(ttlsecond)
+	localAuth.Item.TTLSecond = uint64(ttlsecond)
 
-	localAuthItem.Value.DataBlob, err = ioutil.ReadAll(ctx.Request.Body)
+	localAuth.Item.Value.DataBlob, err = ioutil.ReadAll(ctx.Request.Body)
 	if err != nil {
-		gollog.Err(fmt.Sprintf("SET - key '%s' had failure to read it's data", localAuthItem.Name))
+		gollog.Err(fmt.Sprintf("SET - key '%s' had failure to read it's data", localAuth.Item.Name))
 		ctx.Writer.Header().Add("Content-Type", "application/json")
 		ctx.JSON(400, ExitResponse{Msg: err.Error()})
 		return
 	}
-	if len(localAuthItem.Value.DataBlob) == 0 {
-		gollog.Err(fmt.Sprintf("SET - key '%s' is provided with empty data", localAuthItem.Name))
+	if len(localAuth.Item.Value.DataBlob) == 0 {
+		gollog.Err(fmt.Sprintf("SET - key '%s' is provided with empty data", localAuth.Item.Name))
 		ctx.JSON(400, ExitResponse{Msg: "empty data blob recieved"})
 		return
 	}
 
-	if !localAuthItem.Set(datastore) {
+	if !localAuth.Item.Set(datastore) {
 		ctx.JSON(500, ExitResponse{Msg: "auth identifier creation failed"})
 		return
 	}
 
-	ctx.String(http.StatusOK, string(localAuthItem.Value.Key))
+	ctx.String(http.StatusOK, string(localAuth.Item.Value.Key))
 }
 
 /*
@@ -172,15 +182,14 @@ func (localAuth LocalAuth) AuthUnmount(ctx *gin.Context) {
 
 	ctx.Writer.Header().Add("Content-Type", "application/json")
 
-	localAuthItem := localAuth.Item
-	localAuthItem.Name = ctx.Param("uuid")
-	localAuthItem.Value.Key = []byte(ctx.Request.Header.Get("X-DORY-TOKEN"))
+	localAuth.Item.Name = ctx.Param("uuid")
+	localAuth.Item.Value.Key = []byte(ctx.Request.Header.Get("X-DORY-TOKEN"))
 
 	if localAuth.Item.Name == "" {
 		ctx.JSON(500, ExitResponse{Msg: "passed uuid is empty"})
 		return
 	}
-	if !localAuthItem.Delete(datastore) {
+	if !localAuth.Item.Delete(datastore) {
 		ctx.JSON(500, ExitResponse{Msg: "auth identifier purge failed"})
 		return
 	}
@@ -249,14 +258,13 @@ func (localAuth LocalAuth) PurgeOne(ctx *gin.Context) {
 		return
 	}
 
-	localAuthItem := localAuth.Item
 	localAuth.Item.Name = ctx.Param("uuid")
 
-	if localAuthItem.Name == "" {
+	if localAuth.Item.Name == "" {
 		ctx.JSON(500, ExitResponse{Msg: "passed uuid is empty"})
 		return
 	}
-	if datastore.PurgeOne(localAuthItem.Name) != nil {
+	if datastore.PurgeOne(localAuth.Item.Name) != nil {
 		ctx.JSON(500, ExitResponse{Msg: "purge-one failed"})
 		return
 	}
