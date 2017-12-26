@@ -19,8 +19,10 @@ When you run `dory`, webserver by default will be available at [:8080](http://lo
 
 * Dory server provides admin api accessible by HTTP Header `X-DORY-ADMIN-TOKEN: <admin-token>`.
 > This `admin-token` need to be configured as environment variable `DORY_ADMIN_TOKEN` with value of more than 256 characters. Else it is not usable.
-> admin tasks of List and Purge of all keys
-> just a reminder values are not decipherable using this,as that's only possible using tokens... though they can be deleted in encrypted state itself
+>
+> Admin tasks of List and Purge of all keys.
+>
+> Just a reminder values are not decipherable using this,as that's only possible using tokens... though they can be deleted in encrypted state itself.
 
 
 **Sample docker run command with http port changed to 8000 and admin-token configured**
@@ -41,42 +43,60 @@ docker run \
 > it's default task as well so no need to provide that flag
 
 ```
-dory-linux-amd64 -mode client -task ping -url http://127.0.0.1:8080
+dory-linux-amd64 -mode client \
+  -task ping \
+  -url http://127.0.0.1:8080
 ```
 
 
 **Interacting with Cache (Store in Memory with Data Expiry)**
 
 * to publish a secret on Dory with default expiry of 300seconds
-> below would return a token, that is used as value in later, assume returned token is `BmwkoOsB6KeMIUbqW8BC0u5vfDgdsr06`
+> below would return a token, that is used as value in later, assume returned token is _BmwkoOsB6KeMIUbqW8BC0u5vfDgdsr06_
 
 ```
-dory-linux-amd64 -mode client -task set -url http://127.0.0.1:8080 -key some-pass -val "what's in the name"
+dory-linux-amd64 -mode client \
+  -task set \
+  -url http://127.0.0.1:8080 \
+  -key some-pass -val "what's in the name"
 
 ```
 
 * to publish a secret with expiry of 1hour
 
 ```
-dory-linux-amd64 -mode client -task set -url http://127.0.0.1:8080 -ttl 3600 -key some-pass -val "what's in the name"
+dory-linux-amd64 -mode client \
+  -task set \
+  -url http://127.0.0.1:8080 \
+  -ttl 3600 \
+  -key some-pass -val "what's in the name"
 ```
 
 * to publish a secret with data to be read from a file, as it's a blob (like private-key, credential files, image, anything)
 
 ```
-dory-linux-amd64 -mode client -task set -url http://127.0.0.1:8080 -ttl 3600 -key some-pass -val-from secret-store.log
+dory-linux-amd64 -mode client \
+  -task set \
+  -url http://127.0.0.1:8080 \
+  -key some-pass -val-from secret-store.log
 ```
 
 * fetch secret published to cache using key using it's token returned while publish
 
 ```
-dory-linux-amd64 -mode client -task get -url http://127.0.0.1:8080 -key what -token BmwkoOsB6KeMIUbqW8BC0u5vfDgdsr06
+dory-linux-amd64 -mode client \
+  -task get \
+  -url http://127.0.0.1:8080 \
+  -key what -token BmwkoOsB6KeMIUbqW8BC0u5vfDgdsr06
 ```
 
 * delete secret published to a key using it's token returned while publish
 
 ```
-dory-linux-amd64 -mode client -task del -url http://127.0.0.1:8080 -key what -token BmwkoOsB6KeMIUbqW8BC0u5vfDgdsr06
+dory-linux-amd64 -mode client \
+  -task del \
+  -url http://127.0.0.1:8080 \
+  -key what -token BmwkoOsB6KeMIUbqW8BC0u5vfDgdsr06
 ```
 
 
@@ -87,7 +107,11 @@ dory-linux-amd64 -mode client -task del -url http://127.0.0.1:8080 -key what -to
 * example like `set` a key
 
 ```
-dory-linux-amd64 -mode client -task set -url http://127.0.0.1:8080 -persist true -key some-pass -val "what's in the name"
+dory-linux-amd64 -mode client \
+  -persist true \
+  -task set \
+  -url http://127.0.0.1:8080 \
+  -key some-pass -val "what's in the name"
 ```
 
 
@@ -97,11 +121,16 @@ dory-linux-amd64 -mode client -task set -url http://127.0.0.1:8080 -persist true
 
 ```
 ## from cache
-dory-linux-amd64 -mode client -url http://127.0.0.1:8080 -task list \
+dory-linux-amd64 -mode client \
+  -task list \
+  -url http://127.0.0.1:8080 \
   -token xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ## from disk
-dory-linux-amd64 -mode client -url http://127.0.0.1:8080 -task list -persist true \
+dory-linux-amd64 -mode client \
+  -persist true \
+  -task list \
+  -url http://127.0.0.1:8080 \
   -token xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
@@ -109,11 +138,16 @@ dory-linux-amd64 -mode client -url http://127.0.0.1:8080 -task list -persist tru
 
 ```
 ## from cache
-dory-linux-amd64 -mode client -url http://127.0.0.1:8080 -task purge \
+dory-linux-amd64 -mode client \
+  -task purge \
+  -url http://127.0.0.1:8080 \
   -token xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ## from disk
-dory-linux-amd64 -mode client -url http://127.0.0.1:8080 -task purge -persist true \
+dory-linux-amd64 -mode client \
+  -persist true \
+  -task purge \
+  -url http://127.0.0.1:8080 \
   -token xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 

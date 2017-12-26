@@ -57,3 +57,8 @@ func (cache *Cache2Go) Purge() error {
 	cache.CacheTable.Flush()
 	return err
 }
+
+func (cache *Cache2Go) PurgeOne(key string) error {
+	err := cache.Delete(key)
+	return err
+}

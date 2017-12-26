@@ -19,4 +19,5 @@ type DataStore interface {
 	List() []string
 	Count() int
 	Purge() error
+	PurgeOne(string) error
 }

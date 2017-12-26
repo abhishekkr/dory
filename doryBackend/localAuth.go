@@ -92,6 +92,10 @@ func (localAuth LocalAuth) Get(ctx *gin.Context) {
 	localAuthItem.Name = ctx.Param("uuid")
 	localAuthItem.Value.Key = []byte(ctx.Request.Header.Get("X-DORY-TOKEN"))
 
+	if localAuth.Item.Name == "" {
+		ctx.JSON(500, ExitResponse{Msg: "passed uuid is empty"})
+		return
+	}
 	if !localAuthItem.Get(datastore) {
 		ctx.Writer.Header().Add("Content-Type", "application/json")
 		ctx.JSON(500, ExitResponse{Msg: "get for required auth identifier failed"})
@@ -122,6 +126,10 @@ func (localAuth LocalAuth) AuthMount(ctx *gin.Context) {
 	localAuthItem := localAuth.Item
 	localAuthItem.Name = ctx.Param("uuid")
 
+	if localAuth.Item.Name == "" {
+		ctx.JSON(500, ExitResponse{Msg: "passed uuid is empty"})
+		return
+	}
 	if localAuthItem.Exists(datastore) {
 		ctx.JSON(409, ExitResponse{Msg: "auth identifier conflict"})
 		return
@@ -168,6 +176,10 @@ func (localAuth LocalAuth) AuthUnmount(ctx *gin.Context) {
 	localAuthItem.Name = ctx.Param("uuid")
 	localAuthItem.Value.Key = []byte(ctx.Request.Header.Get("X-DORY-TOKEN"))
 
+	if localAuth.Item.Name == "" {
+		ctx.JSON(500, ExitResponse{Msg: "passed uuid is empty"})
+		return
+	}
 	if !localAuthItem.Delete(datastore) {
 		ctx.JSON(500, ExitResponse{Msg: "auth identifier purge failed"})
 		return
@@ -217,6 +229,39 @@ func (localAuth LocalAuth) Purge(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, datastore.Purge())
+}
+
+/*
+PurgeOne removes only one provided key from datastore enquired, without decryption required.
+*/
+func (localAuth LocalAuth) PurgeOne(ctx *gin.Context) {
+	ctx.Writer.Header().Add("Content-Type", "application/json")
+
+	datastore, err := localAuth.ctxDatastore(ctx)
+	if err != nil {
+		ctx.JSON(500, ExitResponse{Msg: err.Error()})
+		return
+	}
+
+	err = localAuth.ctxAdminToken(ctx)
+	if err != nil {
+		ctx.JSON(500, ExitResponse{Msg: err.Error()})
+		return
+	}
+
+	localAuthItem := localAuth.Item
+	localAuth.Item.Name = ctx.Param("uuid")
+
+	if localAuthItem.Name == "" {
+		ctx.JSON(500, ExitResponse{Msg: "passed uuid is empty"})
+		return
+	}
+	if datastore.PurgeOne(localAuthItem.Name) != nil {
+		ctx.JSON(500, ExitResponse{Msg: "purge-one failed"})
+		return
+	}
+
+	ctx.JSON(200, ExitResponse{Msg: "success"})
 }
 
 /*

@@ -61,3 +61,8 @@ func (kvstore *Diskv) Purge() error {
 	}
 	return err
 }
+
+func (kvstore *Diskv) PurgeOne(key string) error {
+	err := kvstore.Delete(key)
+	return err
+}
