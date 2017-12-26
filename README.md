@@ -2,6 +2,16 @@
 
 Share your secret with a fish that have short term memory.
 
+> * this is a secret sharing service for masses, where you don't need to be authenticated at service to store and share secret
+>
+> * anyone with access to service can upload a secret and share the token with people they wanna share it
+>
+> * if accessed without an explicit retention parameter, the secret gets purged on first fetch
+>
+> * if stored in `cache` mode, it self expires after a TTL if not accessed for that duration
+>
+> * even service admin can't decipher a secret posted by any user
+
 [![Go Report Card](https://goreportcard.com/badge/abhishekkr/dory)](https://goreportcard.com/report/abhishekkr/dory) [![Build Status](https://travis-ci.org/abhishekkr/dory.svg?branch=master)](https://travis-ci.org/abhishekkr/dory)
 
 quick try using docker [abhishekkr/dory:1.2-alpine](https://hub.docker.com/r/abhishekkr/dory/)
