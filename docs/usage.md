@@ -36,6 +36,7 @@ docker run \
 ```
 
 ---
+---
 
 #### Dory Client
 
@@ -54,6 +55,7 @@ dory-linux-amd64 -mode client \
 curl -skL -X GET 'http://127.0.0.1:8080/ping'
 ```
 
+---
 
 
 **Interacting with Cache (Store in Memory with Data Expiry)**
@@ -76,6 +78,7 @@ curl -skL -X POST \
   'http://127.0.0.1:8080/local-cache/some-pass'
 ```
 
+---
 
 * to publish a secret with expiry of 1hour
 
@@ -95,6 +98,7 @@ curl -skL -X POST \
   'http://127.0.0.1:8080/local-cache/some-pass?ttl=3600'
 ```
 
+---
 
 * to publish a secret with data to be read from a file, as it's a blob (like private-key, credential files, image, anything)
 
@@ -112,6 +116,8 @@ curl -skL -X POST \
   --data @secret-store.log
   'http://127.0.0.1:8080/local-cache/some-pass?ttl=3600'
 ```
+
+---
 
 
 * fetch secret published to cache using key using it's token returned while publish
@@ -131,6 +137,8 @@ curl -skL -X GET \
   'http://127.0.0.1:8080/local-cache/some-pass'
 ```
 
+---
+
 
 * delete secret published to a key using it's token returned while publish
 
@@ -149,6 +157,7 @@ curl -skL -X DELETE \
   'http://127.0.0.1:8080/local-cache/some-pass'
 ```
 
+---
 
 
 **Interacting with non-expiry disk stored secrets**
@@ -172,6 +181,8 @@ curl -skL -X GET \
   --data "what's in the name"
   'http://127.0.0.1:8080/local-disk/some-pass'
 ```
+
+---
 
 
 **Interacting with Admin API**
@@ -207,6 +218,8 @@ curl -skL -X GET \
   'http://127.0.0.1:8080/admin/store/disk'
 ```
 
+---
+
 
 * purge all current keys
 
@@ -238,6 +251,8 @@ curl -skL -X DELETE \
   -H 'X-DORY-ADMIN-TOKEN: some-token-more-than-256-chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' \
   'http://127.0.0.1:8080/admin/store/disk'
 ```
+
+---
 
 
 * purge one key
@@ -273,6 +288,7 @@ curl -skL -X DELETE \
 
 
 ---
+---
 
 #### Current supported flags
 
@@ -301,4 +317,5 @@ dory-linux-amd64:
 
 ```
 
+---
 ---
