@@ -43,6 +43,9 @@ func (dory *DoryClient) httpUserUrl(request *golhttpclient.HTTPRequest) {
 
 func (dory *DoryClient) httpAdminUrl(request *golhttpclient.HTTPRequest) {
 	request.Url = fmt.Sprintf("%s/admin/store/%s", dory.BaseUrl, dory.adminBackend())
+	if dory.Key != "" {
+		request.Url = fmt.Sprintf("%s/%s", request.Url, dory.Key)
+	}
 }
 
 func (dory *DoryClient) httpUserHeaders(request *golhttpclient.HTTPRequest) {
@@ -167,6 +170,23 @@ func (dory *DoryClient) PurgeSecret() (err error) {
 }
 
 func (dory *DoryClient) PurgeAll() (err error) {
+	if dory.BaseUrl == "" {
+		err = golerror.Error(123, "dory url can't be empty")
+		return
+	}
+	if dory.Token == "" {
+		err = golerror.Error(123, "admin token required to purge")
+		return
+	}
+
+	request := dory.httpAdminRequest()
+
+	response, err := request.Delete()
+	dory.Value = []byte(response)
+	return
+}
+
+func (dory *DoryClient) PurgeOne() (err error) {
 	if dory.BaseUrl == "" {
 		err = golerror.Error(123, "dory url can't be empty")
 		return

@@ -26,6 +26,9 @@ func HandleClientAuth(goldory DoryClient, axn string) {
 	case "purge":
 		err = goldory.PurgeAll()
 		fmt.Println(string(goldory.Value))
+	case "purge-one":
+		err = goldory.PurgeOne()
+		fmt.Println(string(goldory.Value))
 	default:
 		log.Fatalf("unsupported client action", axn)
 	}
