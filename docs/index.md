@@ -7,19 +7,37 @@
 
 * [Development Workflow ~ run a local copy and try local changes](./development)
 
-#### Current Features:
 
-> * can also reach permanent (disk persisted, non-ttl) memories in Dory by providing `GET Param` as `persist=true`
+Current Features:
+
+* local-auth has 2 kind of datastores, non-persistent `cache` and persistent `disk`
+
+> * both of these stores purge their entry on any fetch by default, unless asked to `keep=true` it further
 >
-> * provides local auth-store backed by `cache2go` and encrypted by AES crypto
+> * `cache` store has extra expiry attached to it, for keys to self-delete if not accessed for TTL (default 300seconds)
 >
-> * allows POST, GET and DELETE for a `auth identifier path` (like `http://dory.local:8080/local-auth/:identifier`) to store, fetch and purge data
+> * `disk` store persists secrets which are resumable even after service restart
 >
-> * successful POST of data at `auth identifier path` returns reference `X-DORY-TOKEN` mapped with this `auth identifier path`, this token need to be sent as value of this header `X-DORY-TOKEN` for GET and DELETE.
+> * all secrets are stored post AES encryption with per secret unique token
 >
-> * created secret store have default TTL of 5minutes, custom TTL can be set as URL Param in POST request by value of `ttlsecond` in seconds
+> * every secret can only be deciphered by it's token which is returned as response of posting the secret, so if token is lost... so is data in secret
 >
-> * first GET of secret will purge it from store, unless GET Param `keep=true` is provided
+> * token is also required to delete the secret by normal users
+
+
+* admin tasks
+
+> * listing of all the keys against which secrets are stored
+>
+> * purge one key, if by mistake wrong or undesired secret has been shared
+>
+> * purge all keys, for cleanup or in times of threat
+>
+> `just a reminder that value is not recoverable using Admin Token`
+
+
+* `/ping` api listing count of keys in cache and disk
+
 
 ---
 
