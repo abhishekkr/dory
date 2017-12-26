@@ -287,7 +287,7 @@ dory-linux-amd64:
   -persist
     	to decide datastore as cache or disk, defaults as false for cache
   -task string
-    	the kind of action dory client need to perform, supports {set,get,del,list,purge,ping}; defaults ping (default "ping")
+    	the kind of action dory client need to perform, supports {set,get,del,list,purge,purge-one,ping}; defaults ping (default "ping")
   -token string
     	token for secret, required when trying to Get or Delete a key
   -ttl int
