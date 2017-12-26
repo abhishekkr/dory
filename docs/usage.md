@@ -15,7 +15,7 @@ docker run -it -p8080:8080 abhishekkr/dory:latest
 
 When you run `dory`, webserver by default will be available at [:8080](http://localhost:8080) and hosts [help document](http://localhost:8080/help) for quick overview.
 
-* While running Dory server, you can get it's port change by configuring environment variable `DORY_HTTP`. Setting it's value to `:9999` will make it listen at port 9999; value `127.0.0.1:8000` will force it to listen at only `127.0.0.1` on port `8000`.
+* While running Dory server, you can get it's port change by configuring environment variable `DORY_HTTP`. Setting it's value to `:9999` will make it listen at port 9999; value `127.0.0.1:8080` will force it to listen at only `127.0.0.1` on port `8080`.
 
 * Dory server provides admin api accessible by HTTP Header `X-DORY-ADMIN-TOKEN: <admin-token>`.
 > This `admin-token` need to be configured as environment variable `DORY_ADMIN_TOKEN` with value of more than 256 characters. Else it is not usable.
@@ -29,9 +29,9 @@ When you run `dory`, webserver by default will be available at [:8080](http://lo
 
 ```
 docker run \
-  -e DORY_HTTP=:8000 \
-  -e DORY_ADMIN_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx \
-  -it -p8000:8000 \
+  -e DORY_HTTP=:8080 \
+  -e DORY_ADMIN_TOKEN=some-token-more-than-256-chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx \
+  -it -p8000:8080 \
   abhishekkr/dory:latest
 ```
 
@@ -48,6 +48,13 @@ dory-linux-amd64 -mode client \
   -url http://127.0.0.1:8080
 ```
 
+> above `ping` is equivalent to curl call below
+
+```
+curl -skL -X GET 'http://127.0.0.1:8080/ping'
+```
+
+
 
 **Interacting with Cache (Store in Memory with Data Expiry)**
 
@@ -59,8 +66,16 @@ dory-linux-amd64 -mode client \
   -task set \
   -url http://127.0.0.1:8080 \
   -key some-pass -val "what's in the name"
+```
+
+> above `set secret to cache` is equivalent to curl call below
 
 ```
+curl -skL -X POST \
+  --data "what's in the name"
+  'http://127.0.0.1:8080/local-cache/some-pass'
+```
+
 
 * to publish a secret with expiry of 1hour
 
@@ -72,6 +87,15 @@ dory-linux-amd64 -mode client \
   -key some-pass -val "what's in the name"
 ```
 
+> above `set secret to cache with ttl of 1hr` is equivalent to curl call below
+
+```
+curl -skL -X POST \
+  --data "what's in the name"
+  'http://127.0.0.1:8080/local-cache/some-pass?ttl=3600'
+```
+
+
 * to publish a secret with data to be read from a file, as it's a blob (like private-key, credential files, image, anything)
 
 ```
@@ -80,6 +104,15 @@ dory-linux-amd64 -mode client \
   -url http://127.0.0.1:8080 \
   -key some-pass -val-from secret-store.log
 ```
+
+> above `set secret to cache from file blob` is equivalent to curl call below
+
+```
+curl -skL -X POST \
+  --data @secret-store.log
+  'http://127.0.0.1:8080/local-cache/some-pass?ttl=3600'
+```
+
 
 * fetch secret published to cache using key using it's token returned while publish
 
@@ -90,6 +123,15 @@ dory-linux-amd64 -mode client \
   -key what -token BmwkoOsB6KeMIUbqW8BC0u5vfDgdsr06
 ```
 
+> above `get secret from cache using token` is equivalent to curl call below
+
+```
+curl -skL -X GET \
+  -H 'X-DORY-TOKEN: BmwkoOsB6KeMIUbqW8BC0u5vfDgdsr06' \
+  'http://127.0.0.1:8080/local-cache/some-pass'
+```
+
+
 * delete secret published to a key using it's token returned while publish
 
 ```
@@ -98,6 +140,15 @@ dory-linux-amd64 -mode client \
   -url http://127.0.0.1:8080 \
   -key what -token BmwkoOsB6KeMIUbqW8BC0u5vfDgdsr06
 ```
+
+> above `delete secret from cache using token` is equivalent to curl call below
+
+```
+curl -skL -X DELETE \
+  -H 'X-DORY-TOKEN: BmwkoOsB6KeMIUbqW8BC0u5vfDgdsr06' \
+  'http://127.0.0.1:8080/local-cache/some-pass'
+```
+
 
 
 **Interacting with non-expiry disk stored secrets**
@@ -114,6 +165,14 @@ dory-linux-amd64 -mode client \
   -key some-pass -val "what's in the name"
 ```
 
+> above `set secret on disk` is equivalent to curl call below, call at api `/local-disk` instead of `/local-cache`
+
+```
+curl -skL -X GET \
+  --data "what's in the name"
+  'http://127.0.0.1:8080/local-disk/some-pass'
+```
+
 
 **Interacting with Admin API**
 
@@ -124,15 +183,30 @@ dory-linux-amd64 -mode client \
 dory-linux-amd64 -mode client \
   -task list \
   -url http://127.0.0.1:8080 \
-  -token xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  -token some-token-more-than-256-chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ## from disk
 dory-linux-amd64 -mode client \
   -persist true \
   -task list \
   -url http://127.0.0.1:8080 \
-  -token xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  -token some-token-more-than-256-chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
+
+> above `get list of keys using admin-token` is equivalent to curl call below
+
+```
+## from cache
+curl -skL -X GET \
+  -H 'X-DORY-ADMIN-TOKEN: some-token-more-than-256-chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' \
+  'http://127.0.0.1:8080/admin/store/cache'
+
+## from disk
+curl -skL -X GET \
+  -H 'X-DORY-ADMIN-TOKEN: some-token-more-than-256-chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' \
+  'http://127.0.0.1:8080/admin/store/disk'
+```
+
 
 * purge all current keys
 
@@ -141,15 +215,62 @@ dory-linux-amd64 -mode client \
 dory-linux-amd64 -mode client \
   -task purge \
   -url http://127.0.0.1:8080 \
-  -token xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  -token some-token-more-than-256-chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ## from disk
 dory-linux-amd64 -mode client \
   -persist true \
   -task purge \
   -url http://127.0.0.1:8080 \
-  -token xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  -token some-token-more-than-256-chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
+
+> above `purge all keys using admin-token` is equivalent to curl call below
+
+```
+## from cache
+curl -skL -X DELETE \
+  -H 'X-DORY-ADMIN-TOKEN: some-token-more-than-256-chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' \
+  'http://127.0.0.1:8080/admin/store/cache'
+
+## from disk
+curl -skL -X DELETE \
+  -H 'X-DORY-ADMIN-TOKEN: some-token-more-than-256-chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' \
+  'http://127.0.0.1:8080/admin/store/disk'
+```
+
+
+* purge one key
+
+```
+## from cache
+dory-linux-amd64 -mode client \
+  -task purge \
+  -url http://127.0.0.1:8080 \
+  -token some-token-more-than-256-chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+## from disk
+dory-linux-amd64 -mode client \
+  -persist true \
+  -task purge \
+  -url http://127.0.0.1:8080 \
+  -token some-token-more-than-256-chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+> above `purge all keys using admin-token` is equivalent to curl call below
+
+```
+## from cache
+curl -skL -X DELETE \
+  -H 'X-DORY-ADMIN-TOKEN: some-token-more-than-256-chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' \
+  'http://127.0.0.1:8080/admin/store/cache/some-pass'
+
+## from disk
+curl -skL -X DELETE \
+  -H 'X-DORY-ADMIN-TOKEN: some-token-more-than-256-chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' \
+  'http://127.0.0.1:8080/admin/store/disk/some-pass'
+```
+
 
 ---
 
