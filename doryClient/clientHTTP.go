@@ -95,6 +95,7 @@ func (dory *DoryClient) Set() (err error) {
 
 	request := golhttpclient.HTTPRequest{}
 	dory.httpUserUrl(&request)
+	dory.httpParams(&request)
 	request.Body = bytes.NewBuffer(dory.Value)
 
 	dory.Token, err = request.Post()
