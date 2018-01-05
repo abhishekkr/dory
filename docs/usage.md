@@ -5,7 +5,7 @@
 
 Since v1.1 Dory binary can be used in dual mode, server and client.
 
-quick try using docker [abhishekkr/dory:0.3-alpine](https://hub.docker.com/r/abhishekkr/dory/)
+quick try using docker [abhishekkr/dory:1.2-alpine](https://hub.docker.com/r/abhishekkr/dory/)
 
 #### Dory Server
 

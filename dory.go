@@ -27,7 +27,7 @@ var (
 	doryVal       = flag.String("val", "", "value to be provided to dory, required when trying to Post or Delete a key")
 	doryValFile   = flag.String("val-from", "", "value from a file to be provided to dory, required when trying to Post or Delete a key")
 	doryToken     = flag.String("token", "", "token for secret, required when trying to Get or Delete a key")
-	doryClientAxn = flag.String("task", "ping", "the kind of action dory client need to perform, supports {set,get,del,list,purge,ping}; defaults ping")
+	doryClientAxn = flag.String("task", "ping", "the kind of action dory client need to perform, supports {set,get,del,list,purge,purge-one,ping}; defaults ping")
 	doryKeyTTL    = flag.Int("ttl", 300, "ttl for key, if it's set task for cache datastore; defaults 300 sec")
 	doryPersist   = flag.Bool("persist", false, "to decide datastore as cache or disk, defaults as false for cache")
 	doryReadNKeep = flag.Bool("keep", false, "to decide if to purge key post read or not, defaults as false for purge on read")

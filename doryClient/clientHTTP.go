@@ -93,9 +93,7 @@ func (dory *DoryClient) Set() (err error) {
 		dory.Key = fmt.Sprintf("dory-%s", golrandom.Token(10))
 	}
 
-	request := golhttpclient.HTTPRequest{}
-	dory.httpUserUrl(&request)
-	dory.httpParams(&request)
+	request := dory.httpUserRequest()
 	request.Body = bytes.NewBuffer(dory.Value)
 
 	dory.Token, err = request.Post()
