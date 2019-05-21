@@ -8,6 +8,7 @@ import (
 
 	doryBackend "github.com/abhishekkr/dory/doryBackend"
 	doryClient "github.com/abhishekkr/dory/doryClient"
+	doryCluster "github.com/abhishekkr/dory/doryCluster"
 
 	golenv "github.com/abhishekkr/gol/golenv"
 	gollog "github.com/abhishekkr/gol/gollog"
@@ -21,6 +22,7 @@ var (
 	*/
 	HTTPAt = golenv.OverrideIfEnv("DORY_HTTP", ":8080")
 
+	doryLeaders   = flag.String("leaders", "", "comma-separated leaders' IP like 127.0.0.1:9876 and 127.0.0.1:9876,127.0.0.1:9875")
 	doryMode      = flag.String("mode", "server", "run mode, allowed modes are client and server, defaults server")
 	doryUrl       = flag.String("url", "", "url for dory server to be talked to")
 	doryKey       = flag.String("key", "", "key name to be provided to dory")
@@ -37,6 +39,7 @@ func main() {
 	flag.Parse()
 
 	if *doryMode == "server" {
+		doryCluster.Join(*doryLeaders)
 		gollog.Debug("starting dory as server")
 		ginUp(HTTPAt)
 		gollog.Debug("bye .")

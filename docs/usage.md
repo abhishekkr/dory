@@ -17,6 +17,8 @@ When you run `dory`, webserver by default will be available at [:8080](http://lo
 
 * While running Dory server, you can get it's port change by configuring environment variable `DORY_HTTP`. Setting it's value to `:9999` will make it listen at port 9999; value `127.0.0.1:8080` will force it to listen at only `127.0.0.1` on port `8080`.
 
+* Memberlist/Gossip binding/advertising will by default bind to port `7946`. They can be overridden by environment variables like `DORY_MEMBERS_BIND=7947` and `DORY_MEMBERS_ADVERTISE=7947`.
+
 * Dory server provides admin api accessible by HTTP Header `X-DORY-ADMIN-TOKEN: <admin-token>`.
 > This `admin-token` need to be configured as environment variable `DORY_ADMIN_TOKEN` with value of more than 256 characters. Else it is not usable.
 >
