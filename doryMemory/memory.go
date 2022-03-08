@@ -26,6 +26,7 @@ LocalAuth is a struct for Name as Auth-Path, Value with Gol Library Struct for D
 type LocalAuth struct {
 	Name      string
 	Value     golcrypt.AESBlock
+	Key       []byte
 	TTLSecond uint64
 }
 
@@ -67,9 +68,10 @@ func (auth *LocalAuth) Set(dataStore DataStore) bool {
 		gollog.Err(fmt.Sprintf("key '%s' sent to corrupted datastore", auth.Name))
 		return false
 	}
-	if auth.Value.Key == nil {
-		auth.Value.Key = []byte(golrandom.Token(32)) //size 16/24/32 allowed
+	if auth.Key == nil {
+		auth.Key = []byte(golrandom.Token(32)) //size 16/24/32 allowed
 	}
+	auth.Value.Key = golcrypt.KeyForAES(auth.Key)
 
 	if err := auth.Value.Encrypt(); err != nil {
 		gollog.Err(err.Error())
@@ -82,9 +84,9 @@ func (auth *LocalAuth) Set(dataStore DataStore) bool {
 	}
 
 	ttl := time.Duration(auth.TTLSecond) * time.Second
-	dataStore.Add(auth.Name, ttl, []byte(auth.Value.Cipher))
+	dataStore.Add(auth.Name, ttl, auth.Value.Cipher)
 
-	gollog.Debug(fmt.Sprintf("SET - '%s' created with '%s'", auth.Name, auth.Value.Key))
+	gollog.Debug(fmt.Sprintf("SET - '%s' created with '%s'", auth.Name, auth.Key))
 	return auth.Exists(dataStore)
 }
 
@@ -98,10 +100,13 @@ func (auth *LocalAuth) Get(dataStore DataStore) bool {
 		gollog.Err(fmt.Sprintf("key '%s' asked from corrupted datastore", auth.Name))
 		return false
 	}
-	if auth.Value.Key == nil {
+
+	if auth.Key == nil {
 		gollog.Err(fmt.Sprintf("key '%s' asked with missing token", auth.Name))
 		return false
 	}
+	auth.Value.Key = golcrypt.KeyForAES(auth.Key)
+
 	if !auth.Exists(dataStore) {
 		gollog.Err(fmt.Sprintf("key '%s doesn't exist", auth.Name))
 		return false
@@ -132,6 +137,7 @@ func (auth *LocalAuth) Delete(dataStore DataStore) bool {
 		return false
 	}
 
+	auth.Value.Key = golcrypt.KeyForAES(auth.Key)
 	auth.Value.Cipher = nil
 	auth.Value.DataBlob = nil
 

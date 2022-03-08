@@ -155,7 +155,7 @@ build-for-all(){
     for GOARCH in 386 amd64; do
       [[ ! -z "${FOR_OS_ARCH}" && "${GOOS}-${GOARCH}" != "${FOR_OS_ARCH}" ]] && continue
       echo "building for $GOOS - $GOARCH"
-      go build -o ./bin/${GO_MAIN_BIN}-$GOOS-$GOARCH "${GO_MAIN_FILE}"
+      CGO_ENABLED=0 go build -o ./bin/${GO_MAIN_BIN}-$GOOS-$GOARCH "${GO_MAIN_FILE}"
     done
   done
 }

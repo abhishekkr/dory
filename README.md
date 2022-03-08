@@ -51,6 +51,40 @@ Current Features:
 
 * `/ping` api listing count of keys in cache and disk
 
+
+### Using
+
+* Managing simple secrets
+
+```
+## adding expirable secret file, life of 180sec if not read
+DORY_KEY=$(curl -skL -v -X POST -H "Content-Type: multipart/form-data" \
+        -d@secret.json  \
+        "http://127.0.0.1:8080/local-auth/mysecret?ttlsecond=180")
+
+## fetching secret, which expires on read
+curl -skL -v --request GET -o secret.json  \
+        --header "X-DORY-TOKEN: ${DORY_KEY}" \
+        "http://127.0.0.1:8080/local-auth/mysecret"
+```
+
+
+* Support for big files which need multipart form-data
+
+```
+SECRET_FILE="mysecret.store"
+
+## adding expirable secret file, life of 300sec if not read
+DORY_KEY=$(curl -skL -v -X POST -H "Content-Type: multipart/form-data" \
+        -F "form=@${SECRET_FILE}" \
+        "http://127.0.0.1:8080/local-auth/${SECRET_FILE}?ttlsecond=300&file-field=form")
+
+## fetching secret, which expires on read
+curl -skL -v --request GET -o secret.store  \
+        --header "X-DORY-TOKEN: ${DORY_KEY}" \
+        "http://127.0.0.1:8080/local-auth/${SECRET_FILE}"
+```
+
 ---
 
 [developer's documentation](https://abhishekkr.github.io/dory/development)

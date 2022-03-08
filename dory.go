@@ -124,6 +124,7 @@ func ginUp(listenAt string) {
 		adminStoreAPI.DELETE("/:datastore/:uuid", localAuth.PurgeOne)
 	}
 
+	router.MaxMultipartMemory = 1
 	router.Run(listenAt)
 }
 

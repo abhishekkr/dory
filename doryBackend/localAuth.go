@@ -5,9 +5,13 @@ Local Auth Backend for Dory
 */
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
+	"path"
 	"strconv"
 	"strings"
 
@@ -22,7 +26,17 @@ import (
 
 var (
 	DORY_ADMIN_TOKEN = golenv.OverrideIfEnv("DORY_ADMIN_TOKEN", "")
+	DORY_TEMP_DIR    = golenv.OverrideIfEnv("DORY_TEMP_DIR", "temp")
 )
+
+func init() {
+	if _, err := os.Stat(DORY_TEMP_DIR); errors.Is(err, os.ErrNotExist) {
+		err := os.MkdirAll(DORY_TEMP_DIR, os.ModePerm)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+}
 
 /*
 LocalAuth is a struct to maintain connection details for a Local-Auth and single item construct for actions.
@@ -98,10 +112,9 @@ func (localAuth LocalAuth) ctxAdminToken(ctx *gin.Context) (err error) {
 Get fetchs required auth mapped secret from Local-Auth backend.
 */
 func (localAuth LocalAuth) Get(ctx *gin.Context) {
-	datastore := localAuth.ctxPersist(ctx)
-
 	localAuth.Item.Name = ctx.Param("uuid")
-	localAuth.Item.Value.Key = []byte(ctx.Request.Header.Get("X-DORY-TOKEN"))
+	localAuth.Item.Key = []byte(ctx.Request.Header.Get("X-DORY-TOKEN"))
+	datastore := localAuth.ctxPersist(ctx)
 
 	if localAuth.Item.Name == "" {
 		ctx.JSON(500, ExitResponse{Msg: "passed uuid is empty"})
@@ -132,9 +145,8 @@ func (localAuth LocalAuth) Get(ctx *gin.Context) {
 AuthMount stores a secret mapped with a new auth-path only at Local-Auth with unique auth-token.
 */
 func (localAuth LocalAuth) AuthMount(ctx *gin.Context) {
-	datastore := localAuth.ctxPersist(ctx)
-
 	localAuth.Item.Name = ctx.Param("uuid")
+	datastore := localAuth.ctxPersist(ctx)
 
 	if localAuth.Item.Name == "" {
 		ctx.JSON(500, ExitResponse{Msg: "passed uuid is empty"})
@@ -153,7 +165,20 @@ func (localAuth LocalAuth) AuthMount(ctx *gin.Context) {
 	}
 	localAuth.Item.TTLSecond = uint64(ttlsecond)
 
-	localAuth.Item.Value.DataBlob, err = ioutil.ReadAll(ctx.Request.Body)
+	fileField := ctx.DefaultQuery("file-field", "")
+	if fileField == "" {
+		localAuth.Item.Value.DataBlob, err = ioutil.ReadAll(ctx.Request.Body)
+	} else {
+		dst := path.Join(DORY_TEMP_DIR, localAuth.Item.Name)
+		bigfile, _ := ctx.FormFile(fileField)
+		ctx.SaveUploadedFile(bigfile, dst)
+		localAuth.Item.Value.DataBlob, err = ioutil.ReadFile(dst)
+		warn := os.Remove(dst)
+		if warn != nil {
+			gollog.Warnf(fmt.Sprintf("SET - unable to delete %s from filesystem", dst))
+		}
+	}
+
 	if err != nil {
 		gollog.Err(fmt.Sprintf("SET - key '%s' had failure to read it's data", localAuth.Item.Name))
 		ctx.Writer.Header().Add("Content-Type", "application/json")
@@ -171,19 +196,18 @@ func (localAuth LocalAuth) AuthMount(ctx *gin.Context) {
 		return
 	}
 
-	ctx.String(http.StatusOK, string(localAuth.Item.Value.Key))
+	ctx.String(http.StatusOK, string(localAuth.Item.Key))
 }
 
 /*
 AuthUnmount purges a previously local-auth stored mapped to a auth-path if not yet purged by TTL.
 */
 func (localAuth LocalAuth) AuthUnmount(ctx *gin.Context) {
+	localAuth.Item.Name = ctx.Param("uuid")
+	localAuth.Item.Key = []byte(ctx.Request.Header.Get("X-DORY-TOKEN"))
 	datastore := localAuth.ctxPersist(ctx)
 
 	ctx.Writer.Header().Add("Content-Type", "application/json")
-
-	localAuth.Item.Name = ctx.Param("uuid")
-	localAuth.Item.Value.Key = []byte(ctx.Request.Header.Get("X-DORY-TOKEN"))
 
 	if localAuth.Item.Name == "" {
 		ctx.JSON(500, ExitResponse{Msg: "passed uuid is empty"})
