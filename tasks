@@ -1,0 +1,45 @@
+#!/bin/bash
+
+GO_MAIN_FILE="dory.go"
+BASE_PKG_NAME="dory"
+
+[[ -z "${MY_GOPATH}" ]] && export MY_GOPATH="github.com/abhishekkr/dory"
+[[ -z "${GO_MAIN_FILE}" ]] && export GO_MAIN_FILE="main.go"
+
+build-for-all(){
+  local FOR_OS_ARCH="$1"
+  local GO_MAIN_BIN=$(echo "${GO_MAIN_FILE}" | sed 's/.go$//')
+
+  [[ ! -f "${GO_MAIN_FILE}" ]] && \
+    echo "[error] missing main file ${GO_MAIN_FILE}, set correct env for GO_MAIN_FILE" && \
+    exit 123
+
+  mkdir -p ./bin
+  for GOOS in darwin linux windows; do
+    for GOARCH in 386 amd64; do
+      [[ ! -z "${FOR_OS_ARCH}" && "${GOOS}-${GOARCH}" != "${FOR_OS_ARCH}" ]] && continue
+      echo "building for $GOOS - $GOARCH"
+      CGO_ENABLED=0 go build -o ./bin/${GO_MAIN_BIN}-$GOOS-$GOARCH "${GO_MAIN_FILE}"
+    done
+  done
+}
+
+##############################################################################
+
+go mod tidy
+case "$1" in
+  deps*)
+    go mod vendor
+    ;;
+  run*)
+    go run $(dirname $0)/${GO_MAIN_FILE} ${@:2}
+    ;;
+  build*)
+    build-for-all "$2"
+    ;;
+  **)
+    echo "Use it wisely..., args: deps/run/build"
+    ;;
+esac
+
+
