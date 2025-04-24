@@ -21,6 +21,7 @@ var (
 		HTTPAt specifies server's listen-at config, can be overridden by env var DORY_HTTP. Defaults to '':8080'.
 	*/
 	HTTPAt = golenv.OverrideIfEnv("DORY_HTTP", ":8080")
+	PORT   = golenv.OverrideIfEnv("PORT", "")
 
 	doryLeaders   = flag.String("leaders", "", "comma-separated leaders' IP like 127.0.0.1:9876 and 127.0.0.1:9876,127.0.0.1:9875")
 	doryMode      = flag.String("mode", "server", "run mode, allowed modes are client and server, defaults server")
@@ -37,6 +38,10 @@ var (
 
 func main() {
 	flag.Parse()
+
+	if PORT != "" {
+		HTTPAt = fmt.Sprintf(":%s", PORT)
+	}
 
 	if *doryMode == "server" {
 		doryCluster.Join(*doryLeaders)
